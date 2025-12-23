@@ -47,6 +47,12 @@ namespace crsp {
 		void createSwapChain();
 		void createImageViews();
 		void createGraphicsPipeline();
+		void createRenderPass();
+		void createCommandPool();
+		void createCommandBuffer();
+		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+		void drawFrame();
+		void createSyncObjects();
 
 		void pickPhysicalDevice();
 		bool isDeviceSuitable(VkPhysicalDevice device);
@@ -54,6 +60,7 @@ namespace crsp {
 		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
 		void createLogicalDevice();
+		void createFramebuffers();
 
 		std::vector<const char*> getRequiredExtensions();
 		bool checkValidationLayerSupport();
@@ -81,9 +88,17 @@ namespace crsp {
 		VkFormat swapChainImageFormat;
 		VkExtent2D swapChainExtent;
 		std::vector<VkImageView> swapChainImageViews;
+		std::vector<VkFramebuffer> swapChainFramebuffers;
+		VkCommandPool commandPool;
+		VkCommandBuffer commandBuffer;
+
 		VkPipelineLayout pipelineLayout;
+		VkRenderPass renderPass;
+		VkPipeline graphicsPipeline;
 
-
+		VkSemaphore imageAvailableSemaphore;
+		VkSemaphore renderFinishedSemaphore;
+		VkFence inFlightFence;
 
 		VkDebugUtilsMessengerEXT debugMessenger;
 
