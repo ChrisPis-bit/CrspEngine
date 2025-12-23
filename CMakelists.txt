@@ -1,0 +1,56 @@
+cmake_minimum_required(VERSION "3.19.2")
+
+add_subdirectory("libraries/glfw-3.4")
+
+project(CrspEngine)
+set(CMAKE_CXX_STANDARD 17)
+
+file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+add_executable(${CMAKE_PROJECT_NAME} "${MY_SOURCES}" "src/App.cpp")
+
+target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC PROJECT_PATH="${CMAKE_CURRENT_SOURCE_DIR}/") # Uncomment this line to setup for development
+#target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC PROJECT_PATH="") # Uncomment this line to setup for production
+
+add_compile_definitions(DEBUG)
+
+find_package(Vulkan REQUIRED)
+
+target_include_directories(CrspEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/")
+
+target_link_libraries(CrspEngine PRIVATE glfw Vulkan::Vulkan)
+
+# Correct glslc path
+file(TO_CMAKE_PATH "$ENV{VULKAN_SDK}" VULKAN_SDK_PATH)
+
+set(GLSLC "${VULKAN_SDK_PATH}/Bin/glslc.exe")
+
+set(SHADERS_IN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/shaders")
+set(SHADERS_OUT_DIR "${CMAKE_BINARY_DIR}/shaders")
+
+file(GLOB SHADERS "${SHADERS_IN_DIR}/*.vert" "${SHADERS_IN_DIR}/*.frag")
+
+# Make sure output directory exists
+file(MAKE_DIRECTORY "${SHADERS_OUT_DIR}")
+
+foreach(SHADER ${SHADERS})
+    get_filename_component(SHADER_NAME ${SHADER} NAME)
+
+    message(STATUS "Shader found: ${SHADER_NAME}")
+
+    set(SPIRV "${SHADERS_OUT_DIR}/${SHADER_NAME}.spv")
+
+    message(STATUS "Compiling command: ${GLSLC} ${SHADER} -o ${SPIRV}")
+
+    add_custom_command(
+        OUTPUT "${SPIRV}"
+        COMMAND "${GLSLC}" "${SHADER}" -o "${SPIRV}"
+        DEPENDS "${SHADER}"
+        COMMENT "Compiling shader ${SHADER_NAME}"
+        VERBATIM
+    )
+
+    list(APPEND SPIRV_OUTPUTS "${SPIRV}")
+endforeach()
+
+add_custom_target(Shaders ALL DEPENDS ${SPIRV_OUTPUTS})
+add_dependencies(CrspEngine Shaders)
