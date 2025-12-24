@@ -1,31 +1,18 @@
 #pragma once
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 
 #include <vector>
-#include <optional>
+
+#include "Window.hpp"
+#include "Device.hpp"
 
 namespace crsp {
-	struct QueueFamilyIndices {
-		std::optional<uint32_t> graphicsFamily;
-		std::optional<uint32_t> presentFamily;
+	const int MAX_FRAMES_IN_FLIGHT = 2;
 
-		bool isComplete() {
-			return graphicsFamily.has_value() && presentFamily.has_value();
-		}
-	};
-
-	struct SwapChainSupportDetails {
-		VkSurfaceCapabilitiesKHR capabilities;
-		std::vector<VkSurfaceFormatKHR> formats;
-		std::vector<VkPresentModeKHR> presentModes;
-	};
 
 	class App {
 	public:
@@ -39,82 +26,56 @@ namespace crsp {
 
 	private:
 		void initVulkan();
-		void initWindow();
 		void mainLoop();
 		void cleanup();
-		void createInstance();
-		void createSurface();
 		void createSwapChain();
 		void createImageViews();
 		void createGraphicsPipeline();
 		void createRenderPass();
-		void createCommandPool();
-		void createCommandBuffer();
+		void createCommandBuffers();
 		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 		void drawFrame();
 		void createSyncObjects();
 
-		void pickPhysicalDevice();
-		bool isDeviceSuitable(VkPhysicalDevice device);
-		bool checkDeviceExtensionsSupport(VkPhysicalDevice device);
-		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
-		void createLogicalDevice();
 		void createFramebuffers();
 
-		std::vector<const char*> getRequiredExtensions();
-		bool checkValidationLayerSupport();
-		bool setupDebugMessenger();
 
-		void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 
-		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
 		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 		VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
 		VkShaderModule createShaderModule(const std::vector<char>& code);
 
+		void recreateSwapChain();
+		void cleanupSwapChain();
 
-		GLFWwindow* window;
-		VkInstance instance;
-		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-		VkDevice device;
-		VkQueue graphicsQueue;
-		VkQueue presentQueue;
-		VkSurfaceKHR surface;
+		Window window;
+		Device device;
+
 		VkSwapchainKHR swapChain;
 		std::vector<VkImage> swapChainImages;
 		VkFormat swapChainImageFormat;
 		VkExtent2D swapChainExtent;
 		std::vector<VkImageView> swapChainImageViews;
 		std::vector<VkFramebuffer> swapChainFramebuffers;
-		VkCommandPool commandPool;
-		VkCommandBuffer commandBuffer;
+		std::vector<VkCommandBuffer> commandBuffers;
 
 		VkPipelineLayout pipelineLayout;
 		VkRenderPass renderPass;
 		VkPipeline graphicsPipeline;
 
-		VkSemaphore imageAvailableSemaphore;
-		VkSemaphore renderFinishedSemaphore;
-		VkFence inFlightFence;
+		std::vector<VkSemaphore> imageAvailableSemaphores;
+		std::vector<VkSemaphore> renderFinishedSemaphores;
+		std::vector<VkFence> inFlightFences;
 
-		VkDebugUtilsMessengerEXT debugMessenger;
+		uint32_t currentFrame = 0;
 
-		const std::vector<const char*> deviceExtensions = {
-			VK_KHR_SWAPCHAIN_EXTENSION_NAME
-		};
 
-		const std::vector<const char*> validationLayers = {
-			"VK_LAYER_KHRONOS_validation"
-		};
 
-#ifdef DEBUG
-		const bool enableValidationLayers = true;
-#else
-		const bool enableValidationLayers = false;
-#endif // DEBUG
+
+
 
 
 	};
