@@ -6,7 +6,13 @@ project(CrspEngine)
 set(CMAKE_CXX_STANDARD 17)
 
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-add_executable(${CMAKE_PROJECT_NAME} "${MY_SOURCES}" "src/App.cpp")
+add_executable(${CMAKE_PROJECT_NAME} "${MY_SOURCES}" "src/main.cpp")
+
+
+target_include_directories(CrspEngine
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/public
+)
 
 target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC PROJECT_PATH="${CMAKE_CURRENT_SOURCE_DIR}/") # Uncomment this line to setup for development
 #target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC PROJECT_PATH="") # Uncomment this line to setup for production

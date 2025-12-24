@@ -17,6 +17,7 @@ namespace crsp {
 		bool shouldClose() { return glfwWindowShouldClose(window); }
 		GLFWwindow* getGLFWwindow() { return window; }
 		static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+		VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; }
 
 		bool wasResized() { return framebufferResized; }
 		void resetResizedFlag() { framebufferResized = false; }
