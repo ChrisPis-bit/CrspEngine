@@ -41,6 +41,27 @@ namespace crsp {
 		SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(physicalDevice); }
 		QueueFamilyIndices findQueueFamilies() { return findQueueFamilies(physicalDevice); }
 
+		// Buffer functions
+		void createBuffer(
+			VkDeviceSize size,
+			VkBufferUsageFlags usage,
+			VkMemoryPropertyFlags properties,
+			VkBuffer& buffer,
+			VkDeviceMemory& bufferMemory);
+		VkCommandBuffer beginSingleTimeCommands();
+		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+		void copyBufferToImage(
+			VkBuffer buffer, VkImage image, uint32_t width, uint32_t height, uint32_t layerCount);
+
+		void createImageWithInfo(
+			const VkImageCreateInfo& imageInfo,
+			VkMemoryPropertyFlags properties,
+			VkImage& image,
+			VkDeviceMemory& imageMemory);
+
+
+
 	private:
 		void createVulkanInstance();
 		void pickPhysicalDevice();
@@ -57,6 +78,9 @@ namespace crsp {
 		bool setupDebugMessenger();
 
 		void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+
+		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
 
 		VkInstance instance;
 		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;

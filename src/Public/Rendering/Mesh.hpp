@@ -3,13 +3,15 @@
 #include "glm/glm.hpp"
 
 #include "Device.hpp"
+#include "Buffer.hpp"
 
 #include <array>
 #include <vector>
+#include <memory>
 
 namespace crsp {
 	struct Vertex {
-		glm::vec2 pos;
+		glm::vec3 pos;
 		glm::vec3 color;
 
 		static VkVertexInputBindingDescription getBindingDescription() {
@@ -26,7 +28,7 @@ namespace crsp {
 
 			attributeDescriptions[0].binding = 0;
 			attributeDescriptions[0].location = 0;
-			attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+			attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
 			attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
 			attributeDescriptions[1].binding = 0;
@@ -42,6 +44,7 @@ namespace crsp {
 	public:
 
 		Mesh(Device& device, std::vector<Vertex> vertices);
+		Mesh(Device& device, std::vector<Vertex> vertices, std::vector<uint16_t> indices);
 		~Mesh();
 
 		Mesh(const Mesh&) = delete;
@@ -52,14 +55,15 @@ namespace crsp {
 
 	private:
 		void createVertexBuffer();
-		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+		void createIndexBuffer();
 
 		std::vector<Vertex> vertices;
-
-		VkBuffer vertexBuffer;
-		VkDeviceMemory vertexBufferMemory;
-
+		std::vector<uint16_t> indices;
 		Device& device;
 
+		std::unique_ptr<Buffer> vertexBuffer;
+		std::unique_ptr<Buffer> indexBuffer;
+
+		bool hasIndexBuffer = false;
 	};
 } // namespace

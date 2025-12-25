@@ -21,13 +21,14 @@ namespace crsp {
 		void beginSwapChainRenderPass(VkCommandBuffer commandBuffer);
 		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
+		uint32_t getFrameIndex() { return currentFrame; }
+		float getAspectRatio() { return swapChain->extentAspectRatio(); }
+
 		VkRenderPass getSwapChainRenderPass() { return swapChain->getRenderPass(); }
 
 	private:
 		void createCommandBuffers();
 		void freeCommandBuffers();
-
-
 
 		void recreateSwapChain();
 

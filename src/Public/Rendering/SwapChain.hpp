@@ -25,6 +25,9 @@ namespace crsp{
 		VkImageView getImageView(uint32_t index) { return swapChainImageViews[index]; }
 
 		VkExtent2D getSwapChainExtent() { return swapChainExtent; }
+		float extentAspectRatio() {
+			return static_cast<float>(swapChainExtent.width) / static_cast<float>(swapChainExtent.height);
+		}
 
 		VkResult getNextImage(uint32_t* imageIndex);
 		VkResult submitCommandBuffers(const VkCommandBuffer* buffers, uint32_t* imageIndex);

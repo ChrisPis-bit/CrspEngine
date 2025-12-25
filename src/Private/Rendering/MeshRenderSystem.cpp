@@ -3,34 +3,62 @@
 #include <stdexcept>
 
 namespace crsp {
-	MeshRenderSystem::MeshRenderSystem(Device& device, VkRenderPass renderPass) : device(device)
+	MeshRenderSystem::MeshRenderSystem(Device& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout) : device(device)
 	{
-		createPipelineLayout();
+		createPipelineLayout(globalSetLayout);
 		createPipeline(renderPass);
 	}
 	MeshRenderSystem::~MeshRenderSystem()
 	{
 		vkDestroyPipelineLayout(device.getDevice(), pipelineLayout, nullptr);
 	}
-	void MeshRenderSystem::renderGameObjects(VkCommandBuffer commandBuffer, std::vector<GameObject>& gameObjects)
+	void MeshRenderSystem::renderGameObjects(FrameInfo& frameInfo, std::vector<GameObject>& gameObjects)
 	{
-		pipeline->bind(commandBuffer);
+		pipeline->bind(frameInfo.commandBuffer);
+
+		vkCmdBindDescriptorSets(frameInfo.commandBuffer,
+			VK_PIPELINE_BIND_POINT_GRAPHICS,
+			pipelineLayout,
+			0, 1,
+			&frameInfo.globalDescriptorSet,
+			0,
+			nullptr);
+
 		for (auto& gameObject : gameObjects) {
 			if (!gameObject.mesh)
 				continue;
 
-			gameObject.mesh->bind(commandBuffer);
-			gameObject.mesh->draw(commandBuffer);
+			ObjectPushConstantData push{};
+			gameObject.transform.rotation += glm::vec3(0, 0, 1.45f * frameInfo.frameTime);
+			push.modelMatrix = gameObject.transform.calculateTransformationMatrix();
+			push.normalMatrix = gameObject.transform.calculateNormalMatrix();
+
+			vkCmdPushConstants(frameInfo.commandBuffer,
+				pipelineLayout,
+				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+				0,
+				sizeof(ObjectPushConstantData),
+				&push);
+
+			gameObject.mesh->bind(frameInfo.commandBuffer);
+			gameObject.mesh->draw(frameInfo.commandBuffer);
 		}
 	}
-	void MeshRenderSystem::createPipelineLayout()
+	void MeshRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout)
 	{
+		VkPushConstantRange pushConstantRange{};
+		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+		pushConstantRange.offset = 0;
+		pushConstantRange.size = sizeof(ObjectPushConstantData);
+
+		std::vector<VkDescriptorSetLayout> descriptorSetLayouts{ globalSetLayout };
+
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 0; // Optional
-		pipelineLayoutInfo.pSetLayouts = nullptr; // Optional
-		pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
-		pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
+		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(descriptorSetLayouts.size());
+		pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
+		pipelineLayoutInfo.pushConstantRangeCount = 1;
+		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
 		if (vkCreatePipelineLayout(device.getDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create pipeline layout!");

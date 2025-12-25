@@ -8,71 +8,100 @@ namespace crsp {
 		createVertexBuffer();
 	}
 
+	Mesh::Mesh(Device& device, std::vector<Vertex> vertices, std::vector<uint16_t> indices) : indices(indices), vertices(vertices), device(device)
+	{
+		createVertexBuffer();
+		createIndexBuffer();
+	}
+
 	Mesh::~Mesh()
 	{
-		vkDestroyBuffer(device.getDevice(), vertexBuffer, nullptr);
-		vkFreeMemory(device.getDevice(), vertexBufferMemory, nullptr);
-
+		
 	}
 
 	void Mesh::bind(VkCommandBuffer commandBuffer)
 	{
-		VkBuffer vertexBuffers[] = { vertexBuffer };
+		VkBuffer vertexBuffers[] = { vertexBuffer->getBuffer()};
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+
+		if (hasIndexBuffer) {
+			vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT16);
+		}
 	}
 
 	void Mesh::draw(VkCommandBuffer commandBuffer)
 	{
-		vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+		if (hasIndexBuffer) {
+			vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+		}
+		else {
+			vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertices.size()), 1, 0, 0);
+		}
 	}
 
 	void Mesh::createVertexBuffer()
 	{
-		// Create buffer
-		VkBufferCreateInfo bufferInfo{};
-		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = sizeof(vertices[0]) * vertices.size();
-		bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		uint32_t vertexCount = static_cast<uint32_t>(vertices.size());
+		assert(vertexCount >= 3 && "Vertex count must be atleast 3");
 
-		if (vkCreateBuffer(device.getDevice(), &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create vertex buffer!");
-		}
+		uint32_t vertexSize = sizeof(vertices[0]);
+		uint32_t bufferSize = vertexCount * vertexSize;
 
-		// Allocate memory
-		VkMemoryRequirements memRequirements;
-		vkGetBufferMemoryRequirements(device.getDevice(), vertexBuffer, &memRequirements);
+		// Creates staging buffer
+		Buffer stagingBuffer{ device, 
+			vertexSize,
+			vertexCount,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
 
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer(vertices.data());
 
-		if (vkAllocateMemory(device.getDevice(), &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS) {
-			throw std::runtime_error("failed to allocate vertex buffer memory!");
-		}
+		// Creaty and copy data over to vertex buffer
+		vertexBuffer = std::make_unique<Buffer>(device, 
+			vertexSize,
+			vertexCount,
+			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+			);
 
-		vkBindBufferMemory(device.getDevice(), vertexBuffer, vertexBufferMemory, 0);
-
-		// Fill buffer
-		void* data;
-		vkMapMemory(device.getDevice(), vertexBufferMemory, 0, bufferInfo.size, 0, &data);
-		memcpy(data, vertices.data(), (size_t)bufferInfo.size);
-		vkUnmapMemory(device.getDevice(), vertexBufferMemory);
+		device.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
 	}
-
-	uint32_t Mesh::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+	void Mesh::createIndexBuffer()
 	{
-		VkPhysicalDeviceMemoryProperties memProperties;
-		vkGetPhysicalDeviceMemoryProperties(device.getPhysicalDevice(), &memProperties);
+		// Only create when there are more than 3 indices
+		if (indices.size() < 3)
+			return;
 
-		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
-			if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
-				return i;
-			}
-		}
+		uint32_t indexCount = static_cast<uint32_t>(indices.size());
+		assert(indexCount >= 3 && "Vertex count must be atleast 3");
 
-		throw std::runtime_error("failed to find suitable memory type!");
+		uint32_t indexSize = sizeof(indices[0]);
+		uint32_t bufferSize = indexCount * indexSize;
+
+		// Creates staging buffer
+		Buffer stagingBuffer{ device,
+			indexSize,
+			indexCount,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
+
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer(indices.data());
+
+		// Creaty and copy data over to vertex buffer
+		indexBuffer = std::make_unique<Buffer>(device,
+			indexSize,
+			indexCount,
+			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+		);
+
+		device.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
+
+		hasIndexBuffer = true;
 	}
 } // namespace

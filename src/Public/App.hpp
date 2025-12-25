@@ -11,10 +11,14 @@
 #include "Rendering/Window.hpp"
 #include "Rendering/Device.hpp"
 #include "Rendering/Renderer.hpp"
+#include "Rendering/Descriptors.hpp"
 #include "GameObject.hpp"
 
 namespace crsp {
-
+	struct GlobalUBO {
+		glm::mat4 view;
+		glm::mat4 proj;
+	};
 
 	class App {
 	public:
@@ -34,5 +38,7 @@ namespace crsp {
 		Renderer renderer;
 
 		std::vector<GameObject> gameObjects;
+
+		std::unique_ptr<DescriptorPool> globalPool;
 	};
 }
