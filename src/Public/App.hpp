@@ -10,8 +10,8 @@
 
 #include "Rendering/Window.hpp"
 #include "Rendering/Device.hpp"
-#include "Rendering/SwapChain.hpp"
-#include "Rendering/Pipeline.hpp"
+#include "Rendering/Renderer.hpp"
+#include "GameObject.hpp"
 
 namespace crsp {
 
@@ -27,36 +27,12 @@ namespace crsp {
 		const uint32_t height = 600;
 
 	private:
-		void initVulkan();
 		void mainLoop();
-		void cleanup();
-		void createCommandBuffers();
-		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
-		void drawFrame();
-
-		void recreateSwapChain();
-
-
-
-
-
-
 
 		Window window;
 		Device device;
-		std::unique_ptr<SwapChain> swapChain;
-		std::unique_ptr<Pipeline> pipeline;
+		Renderer renderer;
 
-		std::vector<VkCommandBuffer> commandBuffers;
-
-
-
-		uint32_t currentImageIndex;
-		int currentFrame = 0;
-
-
-
-
-
+		std::vector<GameObject> gameObjects;
 	};
 }

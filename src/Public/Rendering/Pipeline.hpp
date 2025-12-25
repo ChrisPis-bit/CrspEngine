@@ -6,7 +6,7 @@
 namespace crsp {
 	class Pipeline {
 	public:
-		Pipeline(Device& device, VkRenderPass renderPass);
+		Pipeline(Device& device, VkRenderPass renderPass, VkPipelineLayout pipelineLayout);
 		~Pipeline();
 
 		Pipeline(const Pipeline&) = delete;
@@ -15,11 +15,10 @@ namespace crsp {
 		void bind(VkCommandBuffer commandBuffer);
 
 	private:
-		void createGraphicsPipeline(VkRenderPass renderPass);
+		void createGraphicsPipeline(VkRenderPass renderPass, VkPipelineLayout pipelineLayout);
 
 		VkShaderModule createShaderModule(const std::vector<char>& code);
 
-		VkPipelineLayout pipelineLayout;
 		VkPipeline graphicsPipeline;
 
 		Device& device;

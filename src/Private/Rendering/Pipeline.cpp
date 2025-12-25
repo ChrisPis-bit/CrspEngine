@@ -1,5 +1,7 @@
 #include "Rendering/Pipeline.hpp"
 
+#include "Rendering/Mesh.hpp"
+
 #include <stdexcept>
 #include <vector>
 #include <fstream>
@@ -23,22 +25,21 @@ namespace crsp {
 		return buffer;
 	}
 
-	Pipeline::Pipeline(Device& device, VkRenderPass renderPass): device(device) {
-		createGraphicsPipeline(renderPass);
+	Pipeline::Pipeline(Device& device, VkRenderPass renderPass, VkPipelineLayout pipelineLayout) : device(device) {
+		createGraphicsPipeline(renderPass, pipelineLayout);
 	}
 
 	Pipeline::~Pipeline()
 	{
 		// Pipeline layout
 		vkDestroyPipeline(device.getDevice(), graphicsPipeline, nullptr);
-		vkDestroyPipelineLayout(device.getDevice(), pipelineLayout, nullptr);
 	}
 
 	void Pipeline::bind(VkCommandBuffer commandBuffer) {
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 	}
 
-	void Pipeline::createGraphicsPipeline(VkRenderPass renderPass)
+	void Pipeline::createGraphicsPipeline(VkRenderPass renderPass, VkPipelineLayout pipelineLayout)
 	{
 		auto vertShaderCode = readFile("shaders/simple_shader.vert.spv");
 		auto fragShaderCode = readFile("shaders/simple_shader.frag.spv");
@@ -60,13 +61,16 @@ namespace crsp {
 
 		VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
+		// Attributes, move to separate renderer
+		auto bindingDescription = Vertex::getBindingDescription();
+		auto attributeDescriptions = Vertex::getAttributeDescriptions();
 
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.vertexBindingDescriptionCount = 0;
-		vertexInputInfo.pVertexBindingDescriptions = nullptr; // Optional
-		vertexInputInfo.vertexAttributeDescriptionCount = 0;
-		vertexInputInfo.pVertexAttributeDescriptions = nullptr; // Optional
+		vertexInputInfo.vertexBindingDescriptionCount = 1;
+		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+		vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
 		VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
 		inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -144,17 +148,6 @@ namespace crsp {
 		colorBlending.blendConstants[1] = 0.0f; // Optional
 		colorBlending.blendConstants[2] = 0.0f; // Optional
 		colorBlending.blendConstants[3] = 0.0f; // Optional
-
-		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 0; // Optional
-		pipelineLayoutInfo.pSetLayouts = nullptr; // Optional
-		pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
-		pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
-
-		if (vkCreatePipelineLayout(device.getDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create pipeline layout!");
-		}
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
