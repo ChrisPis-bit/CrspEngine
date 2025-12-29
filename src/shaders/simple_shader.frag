@@ -7,6 +7,7 @@ layout (location = 2) in vec2 texCoord;
 layout (location = 0) out vec4 outColor;
 
 layout(binding = 1) uniform sampler2D texSampler;
+layout(binding = 2) uniform sampler2D shadowTexSampler;
 
 layout(set = 0, binding = 0) uniform globalUBO {
     mat4 viewMatrix;

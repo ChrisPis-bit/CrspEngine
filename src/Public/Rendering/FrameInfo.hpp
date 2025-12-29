@@ -11,5 +11,6 @@ namespace crsp {
 		VkCommandBuffer commandBuffer;
 		Camera& camera;
 		VkDescriptorSet globalDescriptorSet;
+		VkDescriptorSet lightDescriptorSet;
 	};
 } // namespace

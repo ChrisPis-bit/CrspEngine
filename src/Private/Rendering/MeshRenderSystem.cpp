@@ -67,6 +67,16 @@ namespace crsp {
 	{
 		assert(pipelineLayout != nullptr && "cannot create pipeline before creating the pipeline layout!");
 
-		pipeline = std::make_unique<Pipeline>(device, renderPass, pipelineLayout);
+		PipelineConfigInfo pipelineConfig{};
+		Pipeline::defaultPipelineConfigInfo(pipelineConfig);
+		pipelineConfig.renderPass = renderPass;
+		pipelineConfig.pipelineLayout = pipelineLayout;
+		pipelineConfig.multisampleInfo.rasterizationSamples = device.getMSAAsamples();
+		pipelineConfig.rasterizationInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+
+		pipeline = std::make_unique<Pipeline>(device,
+			"shaders/simple_shader.vert.spv",
+			"shaders/simple_shader.frag.spv",
+			pipelineConfig);
 	}
 } // namespace

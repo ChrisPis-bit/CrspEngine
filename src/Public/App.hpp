@@ -11,6 +11,7 @@
 #include "Rendering/Window.hpp"
 #include "Rendering/Device.hpp"
 #include "Rendering/Renderer.hpp"
+#include "Rendering/ShadowRenderer.hpp"
 #include "Rendering/Descriptors.hpp"
 #include "GameObject.hpp"
 

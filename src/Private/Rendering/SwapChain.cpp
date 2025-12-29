@@ -410,8 +410,8 @@ namespace crsp {
 		swapChainImageViews.clear();
 
 		// FrameBuffers
-		for (auto framebuffer : swapChainFramebuffers) {
-			vkDestroyFramebuffer(device.getDevice(), framebuffer, nullptr);
+		for (auto frameBuffer : swapChainFramebuffers) {
+			vkDestroyFramebuffer(device.getDevice(), frameBuffer, nullptr);
 		}
 
 		// Swapchain

@@ -18,7 +18,7 @@ namespace crsp {
 		glm::vec3 color{};
 		glm::vec2 texCoord{};
 
-		static VkVertexInputBindingDescription getBindingDescription() {
+		static VkVertexInputBindingDescription getBindingDescriptions() {
 			VkVertexInputBindingDescription bindingDescription{};
 			bindingDescription.binding = 0;
 			bindingDescription.stride = sizeof(Vertex);
