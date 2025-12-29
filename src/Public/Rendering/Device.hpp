@@ -37,6 +37,7 @@ namespace crsp {
 		VkCommandPool getCommandPool() { return commandPool; }
 		VkQueue getGraphicsQueue() { return graphicsQueue; }
 		VkQueue getPresentQueue() { return presentQueue; }
+		VkSampleCountFlagBits getMSAAsamples() { return msaaSamples; }
 
 		SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(physicalDevice); }
 		QueueFamilyIndices findQueueFamilies() { return findQueueFamilies(physicalDevice); }
@@ -59,9 +60,11 @@ namespace crsp {
 			VkMemoryPropertyFlags properties,
 			VkImage& image,
 			VkDeviceMemory& imageMemory);
-		void createImageView(VkImage image, VkFormat format, VkImageView& imageView);
+		void createImageView(VkImage image, VkFormat format, VkImageView& imageView, uint32_t mipLevels);
 
-		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
+
+		void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 
 		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
@@ -87,6 +90,8 @@ namespace crsp {
 
 		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
+		VkSampleCountFlagBits getMaxUsableSampleCount();
+
 		VkInstance instance;
 		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 		VkDevice device;
@@ -96,6 +101,8 @@ namespace crsp {
 		VkSurfaceKHR surface;
 
 		VkDebugUtilsMessengerEXT debugMessenger;
+
+		VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
 		const std::vector<const char*> deviceExtensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME

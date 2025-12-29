@@ -48,6 +48,7 @@ namespace crsp{
 		void createSwapChain();
 		void createImageViews();
 		void createDepthResources();
+		void createColorResources();
 
 		void createFramebuffers();
 
@@ -57,6 +58,7 @@ namespace crsp{
 
 		void cleanupSwapChain();
 		void cleanupDepthResources();
+		void cleanupColorResources();
 
 		VkFormat findDepthFormat();
 
@@ -68,16 +70,22 @@ namespace crsp{
 		std::shared_ptr<SwapChain> oldSwapChain;
 
 		std::vector<VkImage> swapChainImages;
-		std::vector<VkImage> depthImages;
+		VkImage depthImage;
+		VkImage colorImage;
+
 		VkFormat swapChainImageFormat;
 		VkFormat depthFormat;
 
+		std::vector<VkImageView> swapChainImageViews;
+		VkImageView depthImageView;
+		VkImageView colorImageView;
+
+		std::vector<VkFramebuffer> swapChainFramebuffers;
+		VkDeviceMemory depthImageMemory;
+		VkDeviceMemory colorImageMemory;
+
 		VkExtent2D swapChainExtent;
 		VkExtent2D windowExtent;
-		std::vector<VkImageView> swapChainImageViews;
-		std::vector<VkImageView> depthImageViews;
-		std::vector<VkFramebuffer> swapChainFramebuffers;
-		std::vector<VkDeviceMemory> depthImageMemory;
 
 		std::vector<VkSemaphore> imageAvailableSemaphores;
 		std::vector<VkSemaphore> renderFinishedSemaphores;

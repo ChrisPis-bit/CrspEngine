@@ -21,5 +21,7 @@ namespace crsp {
 		VkSampler textureSampler;
 		VkImage textureImage;
 		VkDeviceMemory textureImageMemory;
+
+		uint32_t mipLevels;
 	};
 }
