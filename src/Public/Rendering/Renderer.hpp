@@ -38,7 +38,7 @@ namespace crsp {
 		std::unique_ptr<SwapChain> swapChain;
 		std::vector<VkCommandBuffer> commandBuffers;
 
-		uint32_t currentImageIndex;
+		uint32_t currentImageIndex = 0;
 		int currentFrame = 0;
 	};
 }

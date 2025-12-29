@@ -35,7 +35,11 @@ namespace crsp{
 		bool compareSwapFormats(const SwapChain& swapChain) const {
 			return swapChain.swapChainImageFormat == swapChainImageFormat;
 		}
+
+		size_t getImageCount() { return swapChainImages.size(); }
+
 	private:
+		void init();
 
 		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 		VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
@@ -43,6 +47,8 @@ namespace crsp{
 
 		void createSwapChain();
 		void createImageViews();
+		void createDepthResources();
+
 		void createFramebuffers();
 
 		void createRenderPass();
@@ -50,6 +56,9 @@ namespace crsp{
 		void createSyncObjects();
 
 		void cleanupSwapChain();
+		void cleanupDepthResources();
+
+		VkFormat findDepthFormat();
 
 		Device& device;
 
@@ -59,12 +68,16 @@ namespace crsp{
 		std::shared_ptr<SwapChain> oldSwapChain;
 
 		std::vector<VkImage> swapChainImages;
+		std::vector<VkImage> depthImages;
 		VkFormat swapChainImageFormat;
+		VkFormat depthFormat;
 
 		VkExtent2D swapChainExtent;
 		VkExtent2D windowExtent;
 		std::vector<VkImageView> swapChainImageViews;
+		std::vector<VkImageView> depthImageViews;
 		std::vector<VkFramebuffer> swapChainFramebuffers;
+		std::vector<VkDeviceMemory> depthImageMemory;
 
 		std::vector<VkSemaphore> imageAvailableSemaphores;
 		std::vector<VkSemaphore> renderFinishedSemaphores;

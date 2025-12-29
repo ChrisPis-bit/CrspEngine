@@ -29,7 +29,6 @@ namespace crsp {
 				continue;
 
 			ObjectPushConstantData push{};
-			gameObject.transform.rotation += glm::vec3(0, 0, 1.45f * frameInfo.frameTime);
 			push.modelMatrix = gameObject.transform.calculateTransformationMatrix();
 			push.normalMatrix = gameObject.transform.calculateNormalMatrix();
 

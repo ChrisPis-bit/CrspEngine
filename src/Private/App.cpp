@@ -4,6 +4,7 @@
 #include "Rendering/MeshRenderSystem.hpp"
 #include "GameObject.hpp"
 #include "Camera.hpp"
+#include "Rendering/Texture.hpp"
 
 //std
 #include <iostream>
@@ -18,11 +19,12 @@
 #include <glm/gtc/constants.hpp>
 
 namespace crsp {
-	App::App() : window(width, height, "crsp"), device(window), renderer(window, device)
+	App::App()
 	{
 		globalPool = DescriptorPool::Builder(device)
 			.setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT)
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
+			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, SwapChain::MAX_FRAMES_IN_FLIGHT)
 			.build();
 	}
 
@@ -37,6 +39,8 @@ namespace crsp {
 
 	void App::mainLoop()
 	{
+		Texture2D texture{ device };
+
 		std::vector<std::unique_ptr<Buffer>> uboBuffers(SwapChain::MAX_FRAMES_IN_FLIGHT);
 		for (size_t i = 0; i < uboBuffers.size(); i++)
 		{
@@ -51,37 +55,37 @@ namespace crsp {
 		}
 
 		auto globalSetLayout = DescriptorSetLayout::Builder(device)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
+			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
 			.build();
 
 		std::vector<VkDescriptorSet> globalDescriptorSets(SwapChain::MAX_FRAMES_IN_FLIGHT);
+		auto textureInfo = texture.descriptorInfo();
+
 		for (size_t i = 0; i < globalDescriptorSets.size(); i++)
 		{
 			auto bufferInfo = uboBuffers[i]->descriptorInfo();
 			DescriptorWriter(*globalSetLayout, *globalPool)
 				.writeBuffer(0, &bufferInfo)
+				.writeImage(1, &textureInfo)
 				.build(globalDescriptorSets[i]);
 		}
 
 		// Prepare mesh and game object
-		const std::vector<Vertex> vertices = {
-			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-			{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-			{{-0.5f,  0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}}
-		};
-		const std::vector<uint16_t> indices = {
-			0, 1, 2, 2, 3, 0
-		};
+		std::shared_ptr<Mesh> triangle = Mesh::createMeshFromFile(device, PROJECT_PATH + std::string("models/viking_room.obj"));
 
-		std::shared_ptr<Mesh> triangle = std::make_shared<Mesh>(device, vertices, indices);
-
-		GameObject triangleObject{};
-		triangleObject.mesh = triangle;
-		triangleObject.transform.position += glm::vec3(.5f, 0.0f, -10.0f);
-		triangleObject.transform.rotation = glm::vec3(0.0f,0.0f,0.0f);
-		triangleObject.transform.scale = glm::vec3(5.0f, 1.0f, 5.0f);
-		gameObjects.push_back(std::move(triangleObject));
+		GameObject vikingRoomObject{};
+		vikingRoomObject.mesh = triangle;
+		vikingRoomObject.transform.position += glm::vec3(.5f, 0.0f, -5.0f);
+		vikingRoomObject.transform.rotation = glm::vec3(glm::half_pi<float>(), 0.0f, 0.0f);
+		//vikingRoomObject.transform.scale = glm::vec3(5.0f, 1.0f, 5.0f);
+		gameObjects.push_back(std::move(vikingRoomObject));
+		GameObject triangleObject2{};
+		//triangleObject2.mesh = triangle;
+		//triangleObject2.transform.position += glm::vec3(.5f, 0.0f, -14.0f);
+		//triangleObject2.transform.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+		//triangleObject2.transform.scale = glm::vec3(5.0f, 1.0f, 5.0f);
+		//gameObjects.push_back(std::move(triangleObject2));
 
 		// prepare render system
 		MeshRenderSystem renderSystem{device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
@@ -122,6 +126,8 @@ namespace crsp {
 				ubo.proj = camera.getProjection();
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
+
+				// TODO: shadow rendering
 
 				// render
 				renderer.beginSwapChainRenderPass(commandBuffer);

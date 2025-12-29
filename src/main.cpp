@@ -3,13 +3,13 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "App.hpp"
+#include "Public/App.hpp"
 
 int main()
 {
 	std::cout << "HelloWorld" << '\n';
 
-	crsp::App app;
+	crsp::App app{};
 
 	try {
 		app.run();

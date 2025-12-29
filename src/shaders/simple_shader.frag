@@ -1,11 +1,17 @@
 #version 450
 
 layout (location = 0) in vec3 fragColor;
+layout (location = 1) in vec3 normal;
+layout (location = 2) in vec2 texCoord;
+
 layout (location = 0) out vec4 outColor;
 
-layout(binding = 0) uniform globalUBO {
+layout(binding = 1) uniform sampler2D texSampler;
+
+layout(set = 0, binding = 0) uniform globalUBO {
     mat4 viewMatrix;
     mat4 projectionMatrix;
+    vec3 lightDir;
 } global;
 
 //push constants block
@@ -15,6 +21,11 @@ layout( push_constant ) uniform constants
 	mat4 modelMatrix;
 } pushConstants;
 
+const float AMBIENT = 0.02;
+
 void main(){
-	outColor = vec4(fragColor, 1.0);
+    float diffuse = dot(normalize(normal), global.lightDir);
+    float lightIntensity = AMBIENT + max(diffuse, 0);
+
+	outColor = texture(texSampler, texCoord) * lightIntensity;
 }

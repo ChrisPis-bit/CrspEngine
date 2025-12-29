@@ -18,6 +18,7 @@ namespace crsp {
 	struct GlobalUBO {
 		glm::mat4 view;
 		glm::mat4 proj;
+		glm::vec3 lightDir = glm::normalize(glm::vec3(1, -3, -1));
 	};
 
 	class App {
@@ -27,18 +28,18 @@ namespace crsp {
 
 		void run();
 
-		const uint32_t width = 800;
-		const uint32_t height = 600;
+		const int width = 800;
+		const int height = 600;
 
 	private:
 		void mainLoop();
 
-		Window window;
-		Device device;
-		Renderer renderer;
+		Window window{ width, height, "crsp" };
+		Device device{ window };
+		Renderer renderer{ window, device };
 
 		std::vector<GameObject> gameObjects;
 
-		std::unique_ptr<DescriptorPool> globalPool;
+		std::unique_ptr<DescriptorPool> globalPool{};
 	};
 }
