@@ -19,7 +19,8 @@ namespace crsp {
 	struct GlobalUBO {
 		glm::mat4 view;
 		glm::mat4 proj;
-		glm::vec3 lightDir = glm::normalize(glm::vec3(1, -3, -1));
+		glm::mat4 lightSpaceMat;
+		glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
 	};
 
 	class App {

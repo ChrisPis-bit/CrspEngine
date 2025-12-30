@@ -5,6 +5,7 @@
 #include "GameObject.hpp"
 #include "Camera.hpp"
 #include "Rendering/Texture.hpp"
+#include "Rendering/DirectionalLight.hpp"
 
 //std
 #include <iostream>
@@ -99,22 +100,36 @@ namespace crsp {
 
 		GameObject vikingRoomObject{};
 		vikingRoomObject.mesh = vikingRoom;
-		vikingRoomObject.transform.position += glm::vec3(0.f, 0.0f, -3.0f);
+		vikingRoomObject.transform.position += glm::vec3(0.0f, 0.0f, 0.0f);
 		vikingRoomObject.transform.rotation = glm::vec3(glm::half_pi<float>(), 0.0f, 0.0f);
-		gameObjects.push_back(std::move(vikingRoomObject));
 
 		GameObject quadObject{};
 		quadObject.mesh = quad;
-		quadObject.transform.position += glm::vec3(1.5f, 0.0f, -5.0f);
+		quadObject.transform.position = glm::vec3(1.5f, 0.0f, 0.0f);
 		//quadObject.transform.rotation = glm::vec3(glm::half_pi<float>(), 0.0f, 0.0f);
-		gameObjects.push_back(std::move(quadObject));
 
+		GameObject groundObject{};
+		groundObject.mesh = quad;
+		groundObject.transform.position = vikingRoomObject.transform.position + glm::vec3(0.0f, 0.0f, 0.0f);
+		groundObject.transform.scale = glm::vec3(5.0f, 5.0f, 5.0f);
+		groundObject.transform.rotation = glm::vec3(glm::half_pi<float>(), 0.0f, 0.0f);
+
+		gameObjects.push_back(std::move(vikingRoomObject));
+		gameObjects.push_back(std::move(quadObject));
+		gameObjects.push_back(std::move(groundObject));
 
 		// prepare render system
 		MeshRenderSystem renderSystem{device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
 
 		// Camera
 		Camera camera{};
+		camera.position = glm::vec3(0.0f, -1.0f, 1.0f);
+
+		// Directional light
+		DirectionalLight mainLight{};
+		glm::vec3 lightDir = glm::normalize(glm::vec3(1.5, -3, -1));
+		mainLight.setOrthographicProjection(-3.0f, 3.0f, -3.0f, 3.0f, 1.0f, 7.5f);
+		mainLight.setViewDirection(lightDir * 5.0f, lightDir, glm::vec3(0, 1, 0));
 
 		auto lastTime = std::chrono::high_resolution_clock::now();
 		while (!window.shouldClose()) {
@@ -148,6 +163,8 @@ namespace crsp {
 				GlobalUBO ubo{};
 				ubo.view = camera.getView();
 				ubo.proj = camera.getProjection();
+				ubo.lightSpaceMat = mainLight.getProjectionViewMatrix();
+				ubo.lightDir = lightDir;
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
 

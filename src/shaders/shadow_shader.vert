@@ -2,11 +2,12 @@
 
 layout(location = 0) in vec3 inPosition;
 
-layout(set = 0, binding = 0) uniform lightUBO {
+layout(set = 0, binding = 0) uniform globalUBO {
     mat4 viewMatrix;
     mat4 projectionMatrix;
+    mat4 lightSpaceMat;
     vec3 lightDir;
-} light;
+} global;
 
 //push constants block
 layout( push_constant ) uniform constants
@@ -15,5 +16,5 @@ layout( push_constant ) uniform constants
 } push;
 
 void main() {
-    gl_Position = light.projectionMatrix * light.viewMatrix * push.modelMatrix * vec4(inPosition.x, inPosition.y ,inPosition.z, 1.0);
+    gl_Position = global.lightSpaceMat * push.modelMatrix * vec4(inPosition, 1.0);
 }

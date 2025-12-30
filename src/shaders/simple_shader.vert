@@ -8,10 +8,12 @@ layout(location = 3) in vec2 inTexCoord;
 layout(location = 0) out vec3 fragColor;
 layout(location = 1) out vec3 fragNormal;
 layout(location = 2) out vec2 fragTexCoord;
+layout(location = 3) out vec4 fragLightSpaceCoord;
 
 layout(set = 0, binding = 0) uniform globalUBO {
     mat4 viewMatrix;
     mat4 projectionMatrix;
+    mat4 lightSpaceMat;
     vec3 lightDir;
 } global;
 
@@ -24,9 +26,12 @@ layout( push_constant ) uniform constants
 } push;
 
 void main() {
-    gl_Position = global.projectionMatrix * global.viewMatrix * push.modelMatrix * vec4(inPosition.x, inPosition.y ,inPosition.z, 1.0);
-    fragColor = inColor;
-     
+    vec4 pos = push.modelMatrix * vec4(inPosition, 1.0);
+
+    fragColor = inColor;     
     fragNormal = vec3((push.normalMatrix * vec4(inNormal, 0)).xyz);
     fragTexCoord = inTexCoord;
+    fragLightSpaceCoord = global.lightSpaceMat * pos;
+
+    gl_Position = global.projectionMatrix * global.viewMatrix * pos;
 }

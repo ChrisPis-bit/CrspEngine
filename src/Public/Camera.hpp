@@ -29,12 +29,12 @@ namespace crsp {
 		const glm::mat4& getProjection() const { return projectionMatrix; }
 		const glm::mat4& getView() const { return viewMatrix; }
 
+		glm::vec3 position;
+		glm::vec3 rotation;
+
 	private:
 		glm::mat4 projectionMatrix{ 1.0f };
 		glm::mat4 viewMatrix{ 1.0f };
-
-		glm::vec3 position;
-		glm::vec3 rotation;
 
 		KeyMappings keys{};
 		float moveSpeed = 3.0f;
