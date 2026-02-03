@@ -50,8 +50,8 @@ namespace crsp {
 		framebufferInfo.renderPass = renderPass;
 		framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
 		framebufferInfo.pAttachments = attachments.data();
-		framebufferInfo.width = 512;
-		framebufferInfo.height = 512;
+		framebufferInfo.width = width;
+		framebufferInfo.height = height;
 		framebufferInfo.layers = 1;
 
 		if (vkCreateFramebuffer(device.getDevice(), &framebufferInfo, nullptr, &frameBuffer) != VK_SUCCESS) {
@@ -67,7 +67,7 @@ namespace crsp {
 		renderPassInfo.framebuffer = frameBuffer;
 
 		renderPassInfo.renderArea.offset = { 0, 0 };
-		renderPassInfo.renderArea.extent = { 512, 512 };
+		renderPassInfo.renderArea.extent = { width, height };
 
 		std::array<VkClearValue, 1> clearValues{};
 		clearValues[0].depthStencil = { 1.0f, 0 };
@@ -141,6 +141,8 @@ namespace crsp {
 		Pipeline::defaultPipelineConfigInfo(pipelineConfig);
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = pipelineLayout;
+		//pipelineConfig.rasterizationInfo.cullMode = VK_CULL_MODE_FRONT_BIT;
+
 		pipelineConfig.dynamicStateEnables = {};
 		pipelineConfig.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 		pipelineConfig.dynamicStateInfo.pDynamicStates = nullptr;
@@ -149,13 +151,13 @@ namespace crsp {
 
 		viewport.x = 0.0f;
 		viewport.y = 0.0f;
-		viewport.width = 512;
-		viewport.height = 512;
+		viewport.width = width;
+		viewport.height = height;
 		viewport.minDepth = 0.0f;
 		viewport.maxDepth = 1.0f;
 
 		scissor.offset = { 0, 0 };
-		scissor.extent = { 512, 512 };
+		scissor.extent = { width, height };
 
 		pipelineConfig.viewportInfo.pViewports = &viewport;
 		pipelineConfig.viewportInfo.pScissors = &scissor;
@@ -173,8 +175,8 @@ namespace crsp {
 		VkImageCreateInfo imageInfo{};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageInfo.extent.width = 512;
-		imageInfo.extent.height = 512;
+		imageInfo.extent.width = width;
+		imageInfo.extent.height = height;
 		imageInfo.extent.depth = 1;
 		imageInfo.mipLevels = 1;
 		imageInfo.arrayLayers = 1;

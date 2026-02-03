@@ -6,6 +6,7 @@
 #include "Camera.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/DirectionalLight.hpp"
+#include "Rendering/Material.hpp"
 
 //std
 #include <iostream>
@@ -129,9 +130,9 @@ namespace crsp {
 		DirectionalLight mainLight{};
 		glm::vec3 lightDir = glm::normalize(glm::vec3(1.5, -3, -1));
 		mainLight.setOrthographicProjection(-3.0f, 3.0f, -3.0f, 3.0f, 1.0f, 7.5f);
-		mainLight.setViewDirection(lightDir * 5.0f, lightDir, glm::vec3(0, 1, 0));
 
 		auto lastTime = std::chrono::high_resolution_clock::now();
+		float lightAngle = 0;
 		while (!window.shouldClose()) {
 			glfwPollEvents();
 
@@ -145,6 +146,11 @@ namespace crsp {
 			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, .1f, 100.0f);
 			camera.move(window.getGLFWwindow(), frameTime);
 			camera.updateViewMatrix();
+
+			// Rotate light
+			lightAngle += .5f * frameTime;
+			glm::vec3 lightDir = glm::normalize(glm::vec3(glm::cos(lightAngle), -3, glm::sin(lightAngle)));
+			mainLight.setViewDirection(lightDir * 5.0f, lightDir, glm::vec3(0, 1, 0));
 
 			if (VkCommandBuffer commandBuffer = renderer.beginFrame()) {
 				// prepare frame info
@@ -168,7 +174,7 @@ namespace crsp {
 				uboBuffers[frameIndex]->writeToBuffer(&ubo);
 				uboBuffers[frameIndex]->flush();
 
-				// TODO: shadow rendering
+				// shadow rendering
 				shadowRenderer.beginShadowRenderPass(commandBuffer);
 				shadowRenderer.draw(frameInfo, gameObjects);
 				shadowRenderer.endShadowRenderPass(commandBuffer);

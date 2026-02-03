@@ -31,6 +31,8 @@ namespace crsp {
 
 		void draw(FrameInfo& frameInfo, std::vector<GameObject>& gameObjects);
 
+		const uint32_t width = 1024, height = 1024;
+
 	private:
 		void createDepthResources();
 		void createFramebuffers();
