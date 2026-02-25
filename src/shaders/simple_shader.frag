@@ -7,8 +7,8 @@ layout (location = 3) in vec4 lightSpaceCoord;
 
 layout (location = 0) out vec4 outColor;
 
-layout(binding = 1) uniform sampler2D texSampler;
-layout(binding = 2) uniform sampler2D shadowTexSampler;
+layout(set = 0, binding = 1) uniform sampler2D shadowTexSampler;
+layout(set = 1, binding = 1) uniform sampler2D texSampler;
 
 layout(set = 0, binding = 0) uniform globalUBO {
     mat4 viewMatrix;
@@ -16,6 +16,10 @@ layout(set = 0, binding = 0) uniform globalUBO {
     mat4 lightSpaceMat;
     vec3 lightDir;
 } global;
+
+layout(set = 1, binding = 0) uniform localUBO {
+    vec4 color;
+} local;
 
 //push constants block
 layout( push_constant ) uniform constants
@@ -46,5 +50,6 @@ void main(){
 
     float lightIntensity = AMBIENT + (1.0 - shadow) * max(diffuse, 0);
 
-	outColor = texture(texSampler, texCoord) * lightIntensity;
+	outColor = texture(texSampler, texCoord) * lightIntensity * local.color;
+
 }

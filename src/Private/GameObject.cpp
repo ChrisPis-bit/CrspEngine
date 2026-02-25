@@ -6,6 +6,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace crsp {
+
+	RenderObject GameObject::renderData() {
+		RenderObject renderObj;
+		renderObj.material = material;
+		renderObj.mesh = mesh;
+		renderObj.transformMatrix = transform.calculateTransformationMatrix();
+		renderObj.normalMatrix = transform.calculateNormalMatrix();
+		return renderObj;
+	}
+
     glm::mat4 Transform::calculateTransformationMatrix()
     {
 #if 1

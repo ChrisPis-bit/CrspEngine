@@ -4,6 +4,8 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include "Rendering/Mesh.hpp"
+#include "Rendering/Material.hpp"
+#include "Rendering/MaterialRenderer.hpp"
 
 #include <memory>
 
@@ -24,7 +26,10 @@ namespace crsp {
 		GameObject(GameObject&&) = default;
 		GameObject& operator=(GameObject&&) = default;
 
+		RenderObject renderData();
+
 		std::shared_ptr<Mesh> mesh;
+		std::shared_ptr<Material> material;
 		Transform transform{};
 	};
 } // namespace

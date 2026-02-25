@@ -16,11 +16,8 @@
 #include "GameObject.hpp"
 
 namespace crsp {
-	struct GlobalUBO {
-		glm::mat4 view;
-		glm::mat4 proj;
-		glm::mat4 lightSpaceMat;
-		glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
+	struct BaseMaterial {
+		glm::vec4 color;
 	};
 
 	class App {
@@ -42,6 +39,5 @@ namespace crsp {
 
 		std::vector<GameObject> gameObjects;
 
-		std::unique_ptr<DescriptorPool> globalPool{};
 	};
 }

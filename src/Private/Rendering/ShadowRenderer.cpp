@@ -8,8 +8,14 @@ namespace crsp {
 	{
 		createDepthResources();
 		createRenderPass();
-		createPipelineLayout(lightSetLayout);
-		createPipeline();
+		createFramebuffers();
+		preparePipeline(lightSetLayout);
+	}
+
+	ShadowRenderer::ShadowRenderer(Device& device) : device(device), viewport{}, scissor{}
+	{
+		createDepthResources();
+		createRenderPass();
 		createFramebuffers();
 	}
 
@@ -19,6 +25,12 @@ namespace crsp {
 		vkDestroyPipelineLayout(device.getDevice(), pipelineLayout, nullptr);
 		vkDestroyFramebuffer(device.getDevice(), frameBuffer, nullptr);
 		vkDestroyRenderPass(device.getDevice(), renderPass, nullptr);
+	}
+
+	void ShadowRenderer::preparePipeline(VkDescriptorSetLayout lightSetLayout)
+	{
+		createPipelineLayout(lightSetLayout);
+		createPipeline();
 	}
 
 	VkDescriptorImageInfo ShadowRenderer::descriptorInfo() {

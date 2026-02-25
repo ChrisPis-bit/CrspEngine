@@ -10,12 +10,17 @@ layout(location = 1) out vec3 fragNormal;
 layout(location = 2) out vec2 fragTexCoord;
 layout(location = 3) out vec4 fragLightSpaceCoord;
 
+
 layout(set = 0, binding = 0) uniform globalUBO {
     mat4 viewMatrix;
     mat4 projectionMatrix;
     mat4 lightSpaceMat;
     vec3 lightDir;
 } global;
+
+layout(set = 1, binding = 0) uniform localUBO {
+    vec4 color;
+} local;
 
 //push constants block
 layout( push_constant ) uniform constants

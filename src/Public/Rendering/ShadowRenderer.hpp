@@ -19,10 +19,13 @@ namespace crsp {
 
 	public:
 		ShadowRenderer(Device& device, VkDescriptorSetLayout lightSetLayout);
+		ShadowRenderer(Device& device);
 		~ShadowRenderer();
 
 		ShadowRenderer(const ShadowRenderer&) = delete;
 		ShadowRenderer& operator=(const ShadowRenderer&) = delete;
+
+		void preparePipeline(VkDescriptorSetLayout lightSetLayout);
 
 		VkDescriptorImageInfo descriptorInfo();
 

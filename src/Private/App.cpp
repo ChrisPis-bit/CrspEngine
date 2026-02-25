@@ -1,12 +1,13 @@
 #include "App.hpp"
 
 #include "Rendering/Mesh.hpp"
-#include "Rendering/MeshRenderSystem.hpp"
+#include "Rendering/MaterialRenderer.hpp"
 #include "GameObject.hpp"
 #include "Camera.hpp"
 #include "Rendering/Texture.hpp"
 #include "Rendering/DirectionalLight.hpp"
 #include "Rendering/Material.hpp"
+#include "Rendering/GlobalDescriptorsManager.hpp"
 
 //std
 #include <iostream>
@@ -23,12 +24,6 @@
 namespace crsp {
 	App::App()
 	{
-		globalPool = DescriptorPool::Builder(device)
-			.setMaxSets(SwapChain::MAX_FRAMES_IN_FLIGHT * 2)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, SwapChain::MAX_FRAMES_IN_FLIGHT)
-			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, SwapChain::MAX_FRAMES_IN_FLIGHT)
-			.build();
 	}
 
 	App::~App()
@@ -44,69 +39,48 @@ namespace crsp {
 	{
 		Texture2D texture{ device };
 
-		std::vector<std::unique_ptr<Buffer>> uboBuffers(SwapChain::MAX_FRAMES_IN_FLIGHT);
-		for (size_t i = 0; i < uboBuffers.size(); i++)
-		{
-			uboBuffers[i] = std::make_unique<Buffer>(
-				device,
-				sizeof(GlobalUBO),
-				1,
-				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-			);
-			uboBuffers[i]->map();
-		}
-
-		// Global light layout
-		auto lightSetLayout = DescriptorSetLayout::Builder(device)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
-			.build();
-
-		std::vector<VkDescriptorSet> lightDescriptorSets(SwapChain::MAX_FRAMES_IN_FLIGHT);
-		for (size_t i = 0; i < lightDescriptorSets.size(); i++)
-		{
-			auto bufferInfo = uboBuffers[i]->descriptorInfo();
-			DescriptorWriter(*lightSetLayout, *globalPool)
-				.writeBuffer(0, &bufferInfo)
-				.build(lightDescriptorSets[i]);
-		}
-
 		// shadow renderer
-		ShadowRenderer shadowRenderer{ device, lightSetLayout->getDescriptorSetLayout() };
+		ShadowRenderer shadowRenderer{ device };
 
-		// Global scene layout
-		auto globalSetLayout = DescriptorSetLayout::Builder(device)
-			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
-			.addBinding(1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-			.addBinding(2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT)
-			.build();
+		// Creates global descriptor pool and global descriptor sets/layouts
+		GlobalDescriptorsManager globalDescriptorsManager(device, 2, 2, 1, shadowRenderer.descriptorInfo());
+		shadowRenderer.preparePipeline(globalDescriptorsManager.getLightDescriptorSetLayout());
 
-		std::vector<VkDescriptorSet> globalDescriptorSets(SwapChain::MAX_FRAMES_IN_FLIGHT);
+		// Create Materials
 		auto textureInfo = texture.descriptorInfo();
-		auto shadowInfo = shadowRenderer.descriptorInfo();
+		std::shared_ptr<Material> material = std::make_unique<Material>(device, renderer.getSwapChainRenderPass(), sizeof(BaseMaterial), 1, *globalDescriptorsManager.globalPool, globalDescriptorsManager.getGlobalDescriptorSetLayout(),
+			"shaders/simple_shader.vert.spv",
+			"shaders/simple_shader.frag.spv");
+		material->writeImage(0, &textureInfo);
+		BaseMaterial baseMat{};
+		baseMat.color = glm::vec4(1.0, .5, .1, 1.0);
+		material->writeUniform(&baseMat);
+		material->build();
 
-		for (size_t i = 0; i < globalDescriptorSets.size(); i++)
-		{
-			auto bufferInfo = uboBuffers[i]->descriptorInfo();
-			DescriptorWriter(*globalSetLayout, *globalPool)
-				.writeBuffer(0, &bufferInfo)
-				.writeImage(1, &textureInfo)
-				.writeImage(2, &shadowInfo)
-				.build(globalDescriptorSets[i]);
-		}
+		std::shared_ptr<Material> material2 = std::make_unique<Material>(device, renderer.getSwapChainRenderPass(), sizeof(BaseMaterial), 1, *globalDescriptorsManager.globalPool, globalDescriptorsManager.getGlobalDescriptorSetLayout(),
+			"shaders/simple_shader.vert.spv",
+			"shaders/simple_shader.frag.spv");
+		material2->writeImage(0, &textureInfo);
+		BaseMaterial baseMat2{};
+		baseMat2.color = glm::vec4(0.0, .5, .1, 1.0);
+		material2->writeUniform(&baseMat2);
+		material2->build();
 
-		// Prepare mesh and game object
+		// Prepare meshes
 		std::shared_ptr<Mesh> vikingRoom = Mesh::createMeshFromFile(device, PROJECT_PATH + std::string("models/viking_room.obj"));
 		std::shared_ptr<Mesh> quad = Mesh::createMeshFromFile(device, PROJECT_PATH + std::string("models/quad.obj"));
 
+		// Create gameobjects
 		GameObject vikingRoomObject{};
 		vikingRoomObject.mesh = vikingRoom;
 		vikingRoomObject.transform.position += glm::vec3(0.0f, 0.0f, 0.0f);
 		vikingRoomObject.transform.rotation = glm::vec3(glm::half_pi<float>(), 0.0f, 0.0f);
+		vikingRoomObject.material = material;
 
 		GameObject quadObject{};
 		quadObject.mesh = quad;
 		quadObject.transform.position = glm::vec3(1.5f, 0.0f, 0.0f);
+		quadObject.material = material;
 		//quadObject.transform.rotation = glm::vec3(glm::half_pi<float>(), 0.0f, 0.0f);
 
 		GameObject groundObject{};
@@ -114,13 +88,14 @@ namespace crsp {
 		groundObject.transform.position = vikingRoomObject.transform.position + glm::vec3(0.0f, 0.0f, 0.0f);
 		groundObject.transform.scale = glm::vec3(5.0f, 5.0f, 5.0f);
 		groundObject.transform.rotation = glm::vec3(glm::half_pi<float>(), 0.0f, 0.0f);
+		groundObject.material = material2;
 
 		gameObjects.push_back(std::move(vikingRoomObject));
 		gameObjects.push_back(std::move(quadObject));
 		gameObjects.push_back(std::move(groundObject));
 
 		// prepare render system
-		MeshRenderSystem renderSystem{device, renderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout()};
+		MaterialRenderer materialRenderer{device, renderer.getSwapChainRenderPass(), globalDescriptorsManager.getGlobalDescriptorSetLayout() };
 
 		// Camera
 		Camera camera{};
@@ -132,38 +107,51 @@ namespace crsp {
 		mainLight.setOrthographicProjection(-3.0f, 3.0f, -3.0f, 3.0f, 1.0f, 7.5f);
 
 		auto lastTime = std::chrono::high_resolution_clock::now();
+		auto startTime = lastTime;
 		float lightAngle = 0;
 		while (!window.shouldClose()) {
 			glfwPollEvents();
 
 			// Deltatime
 			auto newTime = std::chrono::high_resolution_clock::now();
-			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - lastTime).count();
+			float currentTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - startTime).count();
+			float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - lastTime).count();
 			lastTime = newTime;
 
 			// Camera movement
 			float aspect = renderer.getAspectRatio();
 			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, .1f, 100.0f);
-			camera.move(window.getGLFWwindow(), frameTime);
+			camera.move(window.getGLFWwindow(), deltaTime);
 			camera.updateViewMatrix();
 
 			// Rotate light
-			lightAngle += .5f * frameTime;
+			if(glfwGetKey(window.getGLFWwindow(), GLFW_KEY_F))
+			lightAngle += 0.5f * deltaTime;
 			glm::vec3 lightDir = glm::normalize(glm::vec3(glm::cos(lightAngle), -3, glm::sin(lightAngle)));
 			mainLight.setViewDirection(lightDir * 5.0f, lightDir, glm::vec3(0, 1, 0));
 
 			if (VkCommandBuffer commandBuffer = renderer.beginFrame()) {
+				BaseMaterial baseMat2{};
+				baseMat2.color = glm::vec4(glm::sin(currentTime), .5, .1, 1.0);
+				material2->writeUniform(&baseMat2);
 				// prepare frame info
 				int frameIndex = renderer.getFrameIndex();
 
 				FrameInfo frameInfo{
 					frameIndex,
-					frameTime,
+					deltaTime,
 					commandBuffer,
 					camera,
-					globalDescriptorSets[frameIndex],
-					lightDescriptorSets[frameIndex],
+					globalDescriptorsManager.getGlobalDescriptorSet(frameIndex),
+					globalDescriptorsManager.getLightDescriptorSet(frameIndex),
 				};
+
+				// Gather render data from game objects.
+				std::vector<RenderObject> renderObjects(gameObjects.size());
+				for (size_t i = 0; i < gameObjects.size(); i++)
+				{
+					renderObjects[i] = gameObjects[i].renderData();
+				}
 
 				// update UBO
 				GlobalUBO ubo{};
@@ -171,19 +159,17 @@ namespace crsp {
 				ubo.proj = camera.getProjection();
 				ubo.lightSpaceMat = mainLight.getProjectionViewMatrix();
 				ubo.lightDir = lightDir;
-				uboBuffers[frameIndex]->writeToBuffer(&ubo);
-				uboBuffers[frameIndex]->flush();
+				globalDescriptorsManager.updateUBO(frameIndex, ubo);
 
 				// shadow rendering
 				shadowRenderer.beginShadowRenderPass(commandBuffer);
 				shadowRenderer.draw(frameInfo, gameObjects);
 				shadowRenderer.endShadowRenderPass(commandBuffer);
 
-
-				// render
+				// main rendering
 				renderer.beginSwapChainRenderPass(commandBuffer);
 
-				renderSystem.renderGameObjects(frameInfo, gameObjects);
+				materialRenderer.renderGameObjects(frameInfo, renderObjects);
 
 				renderer.endSwapChainRenderPass(commandBuffer);
 				renderer.endFrame();
