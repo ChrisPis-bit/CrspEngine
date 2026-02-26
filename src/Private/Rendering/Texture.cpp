@@ -9,9 +9,9 @@
 #include <stb_image.h>
 
 namespace crsp {
-	Texture2D::Texture2D(Device& device) : device(device)
+	Texture2D::Texture2D(Device& device, const std::string& filePath) : device(device)
 	{
-		createTextureImage();
+		createTextureImage(filePath);
 		createTextureImageView();
 		createTextureSampler();
 	}
@@ -35,10 +35,10 @@ namespace crsp {
 		return imageInfo;
 	}
 
-	void Texture2D::createTextureImage()
+	void Texture2D::createTextureImage(const std::string& filePath)
 	{
 		int texWidth, texHeight, texChannels;
-		stbi_uc* pixels = stbi_load((PROJECT_PATH + std::string("textures/viking_room.png")).c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		stbi_uc* pixels = stbi_load((PROJECT_PATH + filePath).c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
 		VkDeviceSize imageSize = texWidth * texHeight * 4;
 

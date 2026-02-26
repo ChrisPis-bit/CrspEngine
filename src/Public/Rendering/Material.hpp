@@ -3,7 +3,15 @@
 #include "Pipeline.hpp"
 #include "Buffer.hpp"
 
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/glm.hpp>
+
 namespace crsp {
+	struct BaseMaterial {
+		glm::vec4 color;
+	};
+
 	class Material {
 	public:
 

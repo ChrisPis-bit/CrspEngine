@@ -2,14 +2,16 @@
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
+#include <memory>
 
 #include "Public/App.hpp"
+#include "SnakeGame/SnakeScene.hpp"
 
 int main()
 {
 	std::cout << "HelloWorld" << '\n';
 
-	crsp::App app{};
+	crsp::App app(std::make_unique<crsp::SnakeScene>());
 
 	try {
 		app.run();

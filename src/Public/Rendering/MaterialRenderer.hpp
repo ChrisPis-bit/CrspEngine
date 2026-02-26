@@ -24,7 +24,7 @@ namespace crsp {
 
 	class MaterialRenderer {
 	public:
-		MaterialRenderer(Device& device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+		MaterialRenderer(Device& device);
 		~MaterialRenderer();
 
 		MaterialRenderer(const MaterialRenderer&) = delete;
@@ -33,12 +33,7 @@ namespace crsp {
 		void renderGameObjects(FrameInfo& frameInfo, std::vector<RenderObject>& renderObjects);
 
 	private:
-		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
-		void createPipeline(VkRenderPass renderPass);
 
 		Device& device;
-
-		std::unique_ptr<Pipeline> pipeline;
-		VkPipelineLayout pipelineLayout;
 	};
 } // namespace

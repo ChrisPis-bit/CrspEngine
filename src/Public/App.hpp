@@ -13,16 +13,13 @@
 #include "Rendering/Renderer.hpp"
 #include "Rendering/ShadowRenderer.hpp"
 #include "Rendering/Descriptors.hpp"
-#include "GameObject.hpp"
+#include "SceneLogic/GameObject.hpp"
+#include "SceneLogic/Scene.hpp"
 
 namespace crsp {
-	struct BaseMaterial {
-		glm::vec4 color;
-	};
-
 	class App {
 	public:
-		App();
+		App(std::unique_ptr<Scene> scene);
 		~App();
 
 		void run();
@@ -37,7 +34,9 @@ namespace crsp {
 		Device device{ window };
 		Renderer renderer{ window, device };
 
-		std::vector<GameObject> gameObjects;
+		std::unique_ptr<Scene> currentScene;
+
+		//std::vector<GameObject> gameObjects;
 
 	};
 }

@@ -6,8 +6,11 @@
 #include "Rendering/Mesh.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/MaterialRenderer.hpp"
+#include "SceneLogic/Component.hpp"
 
 #include <memory>
+#include <vector>
+#include <utility>
 
 namespace crsp {
 	struct Transform {
@@ -26,10 +29,24 @@ namespace crsp {
 		GameObject(GameObject&&) = default;
 		GameObject& operator=(GameObject&&) = default;
 
+		GameObject() = default;
+
+		virtual void start() {}
+		virtual void update() {}
+
+		template<typename T, typename... Args>
+		T* AddComponent(Args&&... args);
+
+		template<typename T>
+		bool FindComponent(T* component);
+
 		RenderObject renderData();
 
 		std::shared_ptr<Mesh> mesh;
 		std::shared_ptr<Material> material;
 		Transform transform{};
+
+	private:
+		std::vector<std::unique_ptr<Component>> components{};
 	};
 } // namespace
