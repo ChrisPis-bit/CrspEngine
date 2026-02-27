@@ -35,10 +35,10 @@ namespace crsp {
 		virtual void update() {}
 
 		template<typename T, typename... Args>
-		T* AddComponent(Args&&... args);
+		T* addComponent(Args&&... args);
 
 		template<typename T>
-		bool FindComponent(T* component);
+		T* getComponent();
 
 		RenderObject renderData();
 
@@ -46,6 +46,7 @@ namespace crsp {
 		std::shared_ptr<Material> material;
 		Transform transform{};
 
+		bool isActive = true;
 	private:
 		std::vector<std::unique_ptr<Component>> components{};
 	};

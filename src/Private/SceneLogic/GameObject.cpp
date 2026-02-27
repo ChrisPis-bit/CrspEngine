@@ -9,7 +9,7 @@
 
 namespace crsp {
 	template<typename T, typename ...Args>
-	T* GameObject::AddComponent(Args&&... args)
+	T* GameObject::addComponent(Args&&... args)
 	{
 		static_assert(std::is_base_of<Component, T>::value, "T must be of type Component!");
 
@@ -21,19 +21,16 @@ namespace crsp {
 	}
 
 	template<typename T>
-	inline bool GameObject::FindComponent(T* component)
+	inline T* GameObject::getComponent()
 	{
 		static_assert(std::is_base_of<Component, T>::value, "T must be of type Component!");
 
 		for (auto comp : components)
 		{
-			if (dynamic_cast<T*>(comp.get()) != nullptr) {
-				component = comp.get();
-				return true;
+			if (auto ptr = dynamic_cast<T*>(comp.get())) {
+				return ptr;
 			}
 		}
-
-		component = nullptr;
 		return false;
 	}
 

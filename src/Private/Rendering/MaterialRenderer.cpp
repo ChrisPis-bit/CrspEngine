@@ -9,7 +9,7 @@ namespace crsp {
 	MaterialRenderer::~MaterialRenderer()
 	{
 	}
-	void MaterialRenderer::renderGameObjects(FrameInfo& frameInfo, std::vector<RenderObject>& renderObjects)
+	void MaterialRenderer::render(FrameInfo& frameInfo, std::vector<RenderObject>& renderObjects)
 	{
 
 		for (auto& renderObject : renderObjects) {

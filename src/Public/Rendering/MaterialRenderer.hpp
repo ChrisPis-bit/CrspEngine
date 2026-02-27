@@ -30,7 +30,7 @@ namespace crsp {
 		MaterialRenderer(const MaterialRenderer&) = delete;
 		MaterialRenderer operator=(const MaterialRenderer&) = delete;
 
-		void renderGameObjects(FrameInfo& frameInfo, std::vector<RenderObject>& renderObjects);
+		void render(FrameInfo& frameInfo, std::vector<RenderObject>& renderObjects);
 
 	private:
 

@@ -94,7 +94,7 @@ namespace crsp {
 		vkCmdEndRenderPass(commandBuffer);
 	}
 
-	void ShadowRenderer::draw(FrameInfo& frameInfo, std::vector<GameObject>& gameObjects)
+	void ShadowRenderer::draw(FrameInfo& frameInfo, std::vector<RenderObject>& renderObjects)
 	{
 		pipeline->bind(frameInfo.commandBuffer);
 
@@ -106,13 +106,13 @@ namespace crsp {
 			0,
 			nullptr);
 
-		for (auto& gameObject : gameObjects)
+		for (auto& renderObject : renderObjects)
 		{
-			if (!gameObject.mesh)
+			if (!renderObject.mesh)
 				continue;
 
 			ShadowPushConstantData push{};
-			push.modelMatrix = gameObject.transform.calculateTransformationMatrix();
+			push.modelMatrix = renderObject.transformMatrix;
 
 			vkCmdPushConstants(frameInfo.commandBuffer,
 				pipelineLayout,
@@ -121,8 +121,8 @@ namespace crsp {
 				sizeof(ShadowPushConstantData),
 				&push);
 
-			gameObject.mesh->bind(frameInfo.commandBuffer);
-			gameObject.mesh->draw(frameInfo.commandBuffer);
+			renderObject.mesh->bind(frameInfo.commandBuffer);
+			renderObject.mesh->draw(frameInfo.commandBuffer);
 		}
 	}
 

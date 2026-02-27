@@ -51,8 +51,8 @@ namespace crsp {
 				renderer.getSwapChainRenderPass(), 
 				uniformBufferSize, textureAmount,
 				*descriptorsManager.globalPool, descriptorsManager.getGlobalDescriptorSetLayout(),
-				"shaders/simple_shader.vert.spv",
-				"shaders/simple_shader.frag.spv");
+				vertFilepath,
+				fragFilepath);
 
 			loadedMaterials.insert({ identifier, material });
 			return material;
