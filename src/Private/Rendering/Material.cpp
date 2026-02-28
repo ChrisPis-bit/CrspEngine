@@ -9,12 +9,18 @@ namespace crsp {
     Material::Material(Device& device, VkRenderPass renderPass, VkDeviceSize uniformBufferSize, uint32_t textures, DescriptorPool& pool, VkDescriptorSetLayout globalSetLayout, const std::string& vertFilepath, const std::string& fragFilepath) : device{device}
     {
 		// Uniform buffer
+		auto minUniformBufferOffsetAlignment = device.getMinimumUniformBufferOffsetAlignment();
+		auto bufferSize = 0;
+
+		if (uniformBufferSize > 0)
+			bufferSize = (uniformBufferSize / minUniformBufferOffsetAlignment + 1) * minUniformBufferOffsetAlignment;
+
 		uniformBuffer = std::make_unique<Buffer>(device, uniformBufferSize, 1, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 		uniformBuffer->map();
 
 
-		// Descriptor set layour
+		// Descriptor set layout
 		auto materialSetLayout = DescriptorSetLayout::Builder(device)
 			.addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 		for (size_t i = 0; i < textures; i++)
@@ -47,7 +53,8 @@ namespace crsp {
 
 	void Material::build()
 	{
-		descriptorWriter->writeBuffer(0, &uniformBuffer->descriptorInfo());
+		VkDescriptorBufferInfo uniformBufferDescriptor = uniformBuffer->descriptorInfo();
+		descriptorWriter->writeBuffer(0, &uniformBufferDescriptor);
 		descriptorWriter->build(descriptorSet);
 	}
 

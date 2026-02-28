@@ -11,6 +11,9 @@
 #include <vector>
 
 namespace crsp {
+	/// <summary>
+	/// Handles loading, creating and storing shared resources.
+	/// </summary>
 	class ResourceManager {
 	public:
 		ResourceManager(Device& device, Renderer& renderer, GlobalDescriptorsManager& descriptorsManager);

@@ -1,4 +1,5 @@
 #include "SceneLogic/GameObject.hpp"
+#include "SceneLogic/Scene.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -8,41 +9,6 @@
 #include <type_traits>
 
 namespace crsp {
-	template<typename T, typename ...Args>
-	T* GameObject::addComponent(Args&&... args)
-	{
-		static_assert(std::is_base_of<Component, T>::value, "T must be of type Component!");
-
-		auto Ptr = std::make_unique<T>(std::forward<Args>(args)...);
-		T* RawPtr = Ptr.get();
-		components.push_back(std::move(Ptr));
-
-		return RawPtr;
-	}
-
-	template<typename T>
-	inline T* GameObject::getComponent()
-	{
-		static_assert(std::is_base_of<Component, T>::value, "T must be of type Component!");
-
-		for (auto comp : components)
-		{
-			if (auto ptr = dynamic_cast<T*>(comp.get())) {
-				return ptr;
-			}
-		}
-		return false;
-	}
-
-	RenderObject GameObject::renderData() {
-		RenderObject renderObj;
-		renderObj.material = material;
-		renderObj.mesh = mesh;
-		renderObj.transformMatrix = transform.calculateTransformationMatrix();
-		renderObj.normalMatrix = transform.calculateNormalMatrix();
-		return renderObj;
-	}
-
     glm::mat4 Transform::calculateTransformationMatrix()
     {
 #if 1

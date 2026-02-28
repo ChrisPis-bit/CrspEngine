@@ -11,15 +11,15 @@
 namespace crsp {
 
 	struct ObjectPushConstantData {
-		glm::mat4 normalMatrix{ 1.f };
-		glm::mat4 modelMatrix{ 1.f };
+		glm::mat4 normalMatrix{ 1.0f };
+		glm::mat4 modelMatrix{ 1.0f };
 	};
 
 	struct RenderObject {
 		std::shared_ptr<Mesh> mesh;
 		std::shared_ptr<Material> material;
-		glm::mat4 transformMatrix;
-		glm::mat3 normalMatrix;
+		glm::mat4 transformMatrix {1.0f};
+		glm::mat3 normalMatrix {1.0f};
 	};
 
 	class MaterialRenderer {

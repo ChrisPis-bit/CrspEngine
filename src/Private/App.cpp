@@ -54,8 +54,6 @@ namespace crsp {
 
 		// Initialize the scene
 		currentScene->init(&resourceManager, &inputSystem);
-		currentScene->loadResources();
-		currentScene->spawnObjects();
 
 		// prepare render system
 		MaterialRenderer materialRenderer{ device };
@@ -112,12 +110,7 @@ namespace crsp {
 				};
 
 				// Gather render data from game objects.
-				std::vector<std::unique_ptr<GameObject>>& gameObjects = currentScene->getGameObjects();
-				std::vector<RenderObject> renderObjects;
-				for (size_t i = 0; i < gameObjects.size(); i++)
-				{
-					if (gameObjects[i]->isActive) renderObjects.push_back(gameObjects[i]->renderData());
-				}
+				std::vector<RenderObject> renderObjects = currentScene->getRenderData();
 
 				// update UBO
 				GlobalUBO ubo{};

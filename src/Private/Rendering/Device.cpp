@@ -696,4 +696,12 @@ namespace crsp {
 		throw std::runtime_error("failed to find supported format!");
 	}
 
+	VkDeviceSize Device::getMinimumUniformBufferOffsetAlignment()
+	{
+		VkPhysicalDeviceProperties physicalDeviceProperties;
+		vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
+		
+		return physicalDeviceProperties.limits.minUniformBufferOffsetAlignment;
+	}
+
 } // namespace

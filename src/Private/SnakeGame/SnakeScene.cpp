@@ -1,4 +1,5 @@
 #include "SnakeGame/SnakeScene.hpp"
+#include "SceneLogic/MeshRenderComponent.hpp"
 #include "Utils.hpp"
 
 #include <memory>
@@ -50,50 +51,52 @@ namespace crsp {
 	void SnakeScene::spawnObjects()
 	{
 		// Create gameobjects
-		GameObject vikingRoomObject{};
-		vikingRoomObject.mesh = resourceManager->getMesh("viking_room");
+		MeshRenderComponent* renderComp;
+
+		/*GameObject& vikingRoomObject = createGameObject();
+		renderComp = vikingRoomObject.addComponent<MeshRenderComponent>();
+		renderComp->mesh = resourceManager->getMesh("viking_room");
+		renderComp->material = resourceManager->getMaterial("standard");
 		vikingRoomObject.transform.rotation = glm::vec3(glm::half_pi<float>(), 0.0f, 0.0f);
-		vikingRoomObject.material = resourceManager->getMaterial("standard");
 
-		GameObject quadObject{};
-		quadObject.mesh = resourceManager->getMesh("quad");
+		GameObject& quadObject = createGameObject();
+		renderComp = quadObject.addComponent<MeshRenderComponent>();
+		renderComp->mesh = resourceManager->getMesh("quad");
+		renderComp->material = resourceManager->getMaterial("standard");
 		quadObject.transform.position = glm::vec3(1.5f, 0.0f, 0.0f);
-		quadObject.material = resourceManager->getMaterial("standard");
 
-		GameObject groundObject{};
-		groundObject.mesh = resourceManager->getMesh("quad");
+		GameObject& groundObject = createGameObject();
+		renderComp = groundObject.addComponent<MeshRenderComponent>();
+		renderComp->mesh = resourceManager->getMesh("quad");
 		groundObject.transform.scale = glm::vec3(5.0f, 5.0f, 5.0f);
 		groundObject.transform.rotation = glm::vec3(glm::half_pi<float>(), 0.0f, 0.0f);
-		groundObject.material = resourceManager->getMaterial("snake");
+		renderComp->material = resourceManager->getMaterial("snake");*/
 
-		GameObject snakeHead{};
-		snakeHead.mesh = resourceManager->getMesh("cube");
+		GameObject& snakeHead = createGameObject();
+		renderComp = snakeHead.addComponent<MeshRenderComponent>();
+		renderComp->mesh = resourceManager->getMesh("cube");
+		renderComp->material = resourceManager->getMaterial("snake");
 		snakeHead.transform.scale = glm::vec3(.5f);
-		snakeHead.material = resourceManager->getMaterial("snake");
 
-		GameObject apple{};
-		apple.mesh = resourceManager->getMesh("cube");
+		GameObject& apple = createGameObject();
+		renderComp = apple.addComponent<MeshRenderComponent>();
+		renderComp->mesh = resourceManager->getMesh("cube");
 		apple.transform.scale = glm::vec3(.5f);
-		apple.material = resourceManager->getMaterial("apple");
+		renderComp->material = resourceManager->getMaterial("apple");
 
-		gameObjects.push_back(std::make_unique<GameObject>(std::move(vikingRoomObject)));
-		gameObjects.push_back(std::make_unique<GameObject>(std::move(quadObject)));
-		gameObjects.push_back(std::make_unique<GameObject>(std::move(groundObject)));
-		gameObjects.push_back(std::make_unique<GameObject>(std::move(snakeHead)));
-		snakeObj = gameObjects.back().get();
-		gameObjects.push_back(std::make_unique<GameObject>(std::move(apple)));
-		appleObj = gameObjects.back().get();
+		snakeObj = &snakeHead;
+		appleObj = &apple;
 
 		uint32_t totalGridCells = gridHeight * gridWidth;
 		snakeSegments.resize(totalGridCells);
 		for (size_t i = 0; i < totalGridCells; i++)
 		{
-			GameObject segment{};
-			segment.mesh = resourceManager->getMesh("cube");
+			GameObject& segment = createGameObject();
+			renderComp = segment.addComponent<MeshRenderComponent>();
+			renderComp->mesh = resourceManager->getMesh("cube");
 			segment.transform.scale = glm::vec3(.5f);
-			segment.material = resourceManager->getMaterial("snake");
+			renderComp->material = resourceManager->getMaterial("snake");
 			segment.isActive = false;
-			gameObjects.push_back(std::make_unique<GameObject>(std::move(segment)));
 
 			snakeSegments[i] = gameObjects.back().get();
 		}

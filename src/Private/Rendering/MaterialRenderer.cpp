@@ -11,9 +11,8 @@ namespace crsp {
 	}
 	void MaterialRenderer::render(FrameInfo& frameInfo, std::vector<RenderObject>& renderObjects)
 	{
-
 		for (auto& renderObject : renderObjects) {
-			if (!renderObject.mesh)
+			if (!renderObject.mesh || !renderObject.material)
 				continue;
 
 			renderObject.material->bindPipeline(frameInfo.commandBuffer);

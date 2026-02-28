@@ -13,6 +13,7 @@
 #include <utility>
 
 namespace crsp {
+
 	struct Transform {
 		glm::vec3 position;
 		glm::vec3 scale{ 1.0f, 1.0f, 1.0f };
@@ -22,6 +23,8 @@ namespace crsp {
 		glm::mat4 calculateNormalMatrix();
 	};
 
+	class Scene;
+
 	class GameObject {
 	public:
 		GameObject(const GameObject&) = delete;
@@ -29,24 +32,56 @@ namespace crsp {
 		GameObject(GameObject&&) = default;
 		GameObject& operator=(GameObject&&) = default;
 
-		GameObject() = default;
+		GameObject(Scene& scene) : scene(scene) {}
 
 		virtual void start() {}
 		virtual void update() {}
 
+		/// <summary>
+		/// Add component of type.
+		/// Handles registering component to relevant system.
+		/// </summary>
+		/// <typeparam name="T">Component type</typeparam>
+		/// <typeparam name="...Args">Component constructor argument types</typeparam>
+		/// <param name="...args">Component constructor arguments</param>
+		/// <returns>Added component</returns>
 		template<typename T, typename... Args>
-		T* addComponent(Args&&... args);
+		T* addComponent(Args&&... args) {
+			static_assert(std::is_base_of<Component, T>::value, "T must be of type Component!");
 
+			auto Ptr = std::make_unique<T>(*this, std::forward<Args>(args)...);
+			T* RawPtr = Ptr.get();
+			components.push_back(std::move(Ptr));
+			scene.getComponentSystemRegistry().registerComponent<T>(RawPtr);
+
+			return RawPtr;
+		}
+
+		/// <summary>
+		/// Gets component of type.
+		/// Returns nullptr if it doesn't exist.
+		/// </summary>
+		/// <typeparam name="T">Component type</typeparam>
+		/// <returns>Found component</returns>
 		template<typename T>
-		T* getComponent();
+		T* getComponent() {
+			static_assert(std::is_base_of<Component, T>::value, "T must be of type Component!");
 
-		RenderObject renderData();
+			for (auto comp : components)
+			{
+				if (auto ptr = dynamic_cast<T*>(comp.get())) {
+					return ptr;
+				}
+			}
+			return false;
+		}
 
-		std::shared_ptr<Mesh> mesh;
-		std::shared_ptr<Material> material;
 		Transform transform{};
-
 		bool isActive = true;
+
+	protected:
+		Scene& scene;
+
 	private:
 		std::vector<std::unique_ptr<Component>> components{};
 	};
