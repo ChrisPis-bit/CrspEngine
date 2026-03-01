@@ -1,6 +1,4 @@
 #include "SceneLogic/Scene.hpp"
-#include "SceneLogic/MeshRenderComponent.hpp"
-#include "SceneLogic/UIRenderComponent.hpp"
 #include <Rendering/UIRenderer.hpp>
 
 namespace crsp {
@@ -12,20 +10,8 @@ namespace crsp {
 		renderData.renderObjects.clear();
 		renderData.UIrenderObjects.clear();
 
-		for (auto& obj : gameObjects) {
-			obj->update();
-		}
+		entityManager.updateSystems(deltaTime, totalTime);
 
 		update(deltaTime, totalTime);
-
-		for (auto& obj : gameObjects) {
-			obj->postUpdate();
-		}
-	}
-
-	GameObject& Scene::createGameObject()
-	{
-		gameObjects.push_back(std::make_unique<GameObject>(*this));
-		return *gameObjects.back();
 	}
 }

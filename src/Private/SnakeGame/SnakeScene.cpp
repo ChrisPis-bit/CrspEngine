@@ -1,6 +1,5 @@
 #include "SnakeGame/SnakeScene.hpp"
-#include "SceneLogic/MeshRenderComponent.hpp"
-#include "SceneLogic/TextRenderComponent.hpp"
+#include "ECS/Systems/MeshRenderSystem.hpp"
 #include "Utils.hpp"
 
 #include <memory>
@@ -57,65 +56,42 @@ namespace crsp {
 			"shaders/text.frag.spv",
 			"text");
 		textMaterial->build();
+
+		// register systems
+		meshRenderSystem = entityManager.registerSystem<MeshRenderSystem>();		
 	}
 
 	void SnakeScene::spawnObjects()
 	{
-		// Create gameobjects
-		MeshRenderComponent* renderComp;
+		//for (size_t i = 0; i < 10; i++)
+		//{
+		//	Entity entity = entityManager.createEntity();
+		//	Transform* transform = entityManager.addComponent<Transform>(entity);
+		//	transform->position = glm::vec3(i * 2.6f, 0.0f, 0.0f);
+		//	MeshRender* meshRender = entityManager.addComponent<MeshRender>(entity);
+		//	meshRender->material = resourceManager->getMaterial("apple");
+		//	meshRender->mesh = resourceManager->getMesh("cube");
+		//}
 
-		GameObject& vikingRoomObject = createGameObject();
-		renderComp = vikingRoomObject.addComponent<MeshRenderComponent>();
-		renderComp->mesh = resourceManager->getMesh("viking_room");
-		renderComp->material = resourceManager->getMaterial("standard");
-		vikingRoomObject.transform.rotation = glm::vec3(glm::half_pi<float>(), 0.0f, 0.0f);
+		snakeObj = entityManager.createEntity();
+		Transform* transform = entityManager.addComponent<Transform>(snakeObj);
+		transform->scale = glm::vec3(.5f);
+		MeshRender* meshRender = entityManager.addComponent<MeshRender>(snakeObj);
+		meshRender->material = resourceManager->getMaterial("snake");
+		meshRender->mesh = resourceManager->getMesh("cube");
 
-		GameObject& quadObject = createGameObject();
-		renderComp = quadObject.addComponent<MeshRenderComponent>();
-		renderComp->mesh = resourceManager->getMesh("quad");
-		renderComp->material = resourceManager->getMaterial("standard");
-		quadObject.transform.position = glm::vec3(1.5f, 0.0f, 0.0f);
+		appleObj = entityManager.createEntity();
+		transform = entityManager.addComponent<Transform>(appleObj);
+		transform->scale = glm::vec3(.5f);
+		meshRender = entityManager.addComponent<MeshRender>(appleObj);
+		meshRender->material = resourceManager->getMaterial("apple");
+		meshRender->mesh = resourceManager->getMesh("cube");
 
-		GameObject& groundObject = createGameObject();
-		renderComp = groundObject.addComponent<MeshRenderComponent>();
-		renderComp->mesh = resourceManager->getMesh("quad");
-		groundObject.transform.scale = glm::vec3(5.0f, 5.0f, 5.0f);
-		groundObject.transform.rotation = glm::vec3(glm::half_pi<float>(), 0.0f, 0.0f);
-		renderComp->material = resourceManager->getMaterial("standard");
 
-		GameObject& snakeHead = createGameObject();
-		renderComp = snakeHead.addComponent<MeshRenderComponent>();
-		renderComp->mesh = resourceManager->getMesh("cube");
-		renderComp->material = resourceManager->getMaterial("snake");
-		snakeHead.transform.scale = glm::vec3(.5f);
-
-		GameObject& apple = createGameObject();
-		renderComp = apple.addComponent<MeshRenderComponent>();
-		renderComp->mesh = resourceManager->getMesh("cube");
-		apple.transform.scale = glm::vec3(.5f);
-		renderComp->material = resourceManager->getMaterial("apple");
-
-		GameObject& text = createGameObject();
-		TextRenderComponent* textComp = text.addComponent<TextRenderComponent>();
-		textComp->material = resourceManager->getMaterial("text");
-		text.transform.scale.x = 1.0f;
-
-		snakeObj = &snakeHead;
-		appleObj = &apple;
-
-		uint32_t totalGridCells = gridHeight * gridWidth;
-		snakeSegments.resize(totalGridCells);
-		for (size_t i = 0; i < totalGridCells; i++)
-		{
-			GameObject& segment = createGameObject();
-			renderComp = segment.addComponent<MeshRenderComponent>();
-			renderComp->mesh = resourceManager->getMesh("cube");
-			segment.transform.scale = glm::vec3(.5f);
-			renderComp->material = resourceManager->getMaterial("snake");
-			segment.isActive = false;
-
-			snakeSegments[i] = gameObjects.back().get();
-		}
+		//GameObject& text = createGameObject();
+		//TextRenderComponent* textComp = text.addComponent<TextRenderComponent>();
+		//textComp->material = resourceManager->getMaterial("text");
+		//text.transform.scale.x = 1.0f;
 	}
 
 	void SnakeScene::start()
@@ -158,8 +134,9 @@ namespace crsp {
 
 		for (auto& segment: snakeSegments)
 		{
-			segment->isActive = false;
+			entityManager.destroyEntity(segment);
 		}
+		snakeSegments.clear();
 
 		moveDir = glm::ivec2(0);
 		moveTimer = 0;
@@ -167,6 +144,12 @@ namespace crsp {
 
 	void SnakeScene::update(float deltaTime, float totalTime)
 	{
+		for (auto& renderObj : meshRenderSystem->renderObjects)
+		{
+			renderData.renderObjects.push_back(renderObj);
+
+		}
+
 		glm::ivec2 move = glm::ivec2(0, 0);
 		if (inputSystem->isKeyPressed(GLFW_KEY_A) && moveDir != glm::ivec2(-1, 0)) move = glm::ivec2(-1, 0);
 		if (inputSystem->isKeyPressed(GLFW_KEY_D) && moveDir != glm::ivec2(1, 0)) move = glm::ivec2(1, 0);
@@ -199,7 +182,13 @@ namespace crsp {
 			if (snakePos == applePos) {
 				applePos = glm::ivec2(randomRange(0, gridWidth + 1), randomRange(0, gridHeight + 1));
 
-				if (segmentPositions.size() < snakeSegments.size()) segmentPositions.push_back(lastSegmentPos);
+				segmentPositions.push_back(lastSegmentPos);
+				Entity newSegment = entityManager.createEntity();
+				entityManager.addComponent<Transform>(newSegment)->scale = glm::vec3(.5f);
+				MeshRender* meshRender = entityManager.addComponent<MeshRender>(newSegment);
+				meshRender->material = resourceManager->getMaterial("snake");
+				meshRender->mesh = resourceManager->getMesh("cube");
+				snakeSegments.push_back(newSegment);
 			}
 
 			// Check collision with grid edges
@@ -219,12 +208,14 @@ namespace crsp {
 
 		for (size_t i = 0; i < segmentPositions.size(); i++)
 		{
-			GameObject* segment = snakeSegments[i];
-			segment->isActive = true;
-			segment->transform.position = glm::vec3(segmentPositions[i].x - gridWidth / 2.0f, 0, -segmentPositions[i].y + gridHeight / 2.0f);
+			Transform* transform = entityManager.getComponent<Transform>(snakeSegments[i]);
+			transform->position = glm::vec3(segmentPositions[i].x - gridWidth / 2.0f, 0, -segmentPositions[i].y + gridHeight / 2.0f);
 		}
 
-		snakeObj->transform.position = glm::vec3(snakePos.x - gridWidth / 2.0f, 0, -snakePos.y + gridHeight / 2.0f);
-		appleObj->transform.position = glm::vec3(applePos.x - gridWidth / 2.0f, 0, -applePos.y + gridHeight / 2.0f);
+		Transform* transform = entityManager.getComponent<Transform>(snakeObj);
+		transform->position = glm::vec3(snakePos.x - gridWidth / 2.0f, 0, -snakePos.y + gridHeight / 2.0f);
+
+		transform = entityManager.getComponent<Transform>(appleObj);
+		transform->position = glm::vec3(applePos.x - gridWidth / 2.0f, 0, -applePos.y + gridHeight / 2.0f);
 	}
 }

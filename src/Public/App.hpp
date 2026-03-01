@@ -14,7 +14,6 @@
 #include "Rendering/ShadowRenderer.hpp"
 #include "Rendering/UIRenderer.hpp"
 #include "Rendering/Descriptors.hpp"
-#include "SceneLogic/GameObject.hpp"
 #include "SceneLogic/Scene.hpp"
 
 namespace crsp {

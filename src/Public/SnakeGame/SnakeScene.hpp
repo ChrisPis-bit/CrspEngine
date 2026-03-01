@@ -1,5 +1,6 @@
 #pragma once
 #include "SceneLogic/Scene.hpp"
+#include "ECS/Systems/MeshRenderSystem.hpp"
 
 namespace crsp {
 	class SnakeScene : public Scene {
@@ -17,6 +18,8 @@ namespace crsp {
 		void gameOver();
 		void reset();
 
+		std::shared_ptr<MeshRenderSystem> meshRenderSystem;
+
 		uint32_t gridWidth = 12;
 		uint32_t gridHeight = 12;
 		float moveInterval = .5f;
@@ -26,10 +29,10 @@ namespace crsp {
 		glm::ivec2 moveDir;
 		glm::ivec2 applePos;
 
-		GameObject* snakeObj;
-		GameObject* appleObj;
-
-		std::vector<GameObject*> snakeSegments;
+		std::vector<Entity> snakeSegments;
 		std::vector<glm::ivec2> segmentPositions;
+
+		Entity snakeObj;
+		Entity appleObj;
 	};
 }

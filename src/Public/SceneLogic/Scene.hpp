@@ -1,8 +1,8 @@
 #include "Rendering/ResourceManager.hpp"
-#include "SceneLogic/GameObject.hpp"
 #include "SceneLogic/InputSystem.hpp"
 #include "Rendering/MaterialRenderer.hpp"
 #include "Rendering/UIRenderer.hpp"
+#include "ECS/EntityManager.hpp"
 #include "Camera.hpp"
 
 #include <vector>
@@ -41,10 +41,7 @@ namespace crsp {
 			camera.setPerspectiveProjection(glm::radians(50.0f), aspectRatio, .1f, 100.0f);
 		}
 
-		GameObject& createGameObject();
-
 		Camera& getCamera() { return camera; }
-		std::vector<std::unique_ptr<GameObject>>& getGameObjects() { return gameObjects; }
 		RenderData getRenderData() { return renderData; }
 		ResourceManager& getResourceManager() { return *resourceManager; }
 
@@ -63,6 +60,7 @@ namespace crsp {
 		InputSystem* inputSystem;
 
 		Camera camera{};
-		std::vector<std::unique_ptr<GameObject>> gameObjects{};
+
+		EntityManager entityManager;
 	};
 }
