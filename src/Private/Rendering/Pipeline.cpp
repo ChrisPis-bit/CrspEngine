@@ -95,6 +95,9 @@ namespace crsp {
 		configInfo.dynamicStateInfo.pDynamicStates = configInfo.dynamicStateEnables.data();
 		configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 		configInfo.dynamicStateInfo.flags = 0;
+
+		configInfo.vertexInputBindingDescription = Vertex::getBindingDescriptions();
+		configInfo.vertexInputAttributeDescriptions = Vertex::getAttributeDescriptions();
 	}
 
 	std::vector<char> Pipeline::readFile(const std::string& filepath)
@@ -145,14 +148,12 @@ namespace crsp {
 		shaderStages[1].pNext = nullptr;
 		shaderStages[1].pSpecializationInfo = nullptr;
 
-		auto bindingDescriptions = Vertex::getBindingDescriptions();
-		auto attributeDescriptions = Vertex::getAttributeDescriptions();
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(configInfo.vertexInputAttributeDescriptions.size());
 		vertexInputInfo.vertexBindingDescriptionCount = 1;
-		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
-		vertexInputInfo.pVertexBindingDescriptions = &bindingDescriptions;
+		vertexInputInfo.pVertexAttributeDescriptions = configInfo.vertexInputAttributeDescriptions.data();
+		vertexInputInfo.pVertexBindingDescriptions = &configInfo.vertexInputBindingDescription;
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;

@@ -1,5 +1,6 @@
 #include "SnakeGame/SnakeScene.hpp"
 #include "SceneLogic/MeshRenderComponent.hpp"
+#include "SceneLogic/TextRenderComponent.hpp"
 #include "Utils.hpp"
 
 #include <memory>
@@ -19,17 +20,19 @@ namespace crsp {
 		resourceManager->loadMesh("models/cube.obj", "cube");
 
 		// Create materials
-		std::shared_ptr<Material> standardMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 1,
+		std::shared_ptr<Material> standardMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 1, 
+			Material::RenderDomain::Surface3D,
 			"shaders/simple_shader.vert.spv",
 			"shaders/simple_shader.frag.spv",
 			"standard");
-		standardMaterial->writeImage(0, &vikingRoomTexture->descriptorInfo());
+		standardMaterial->writeImage(0, &resourceManager->atlasTexture->descriptorInfo());
 		BaseMaterial baseMat{};
 		baseMat.color = glm::vec4(1.0, .5, .1, 1.0);
 		standardMaterial->writeUniform(&baseMat);
 		standardMaterial->build();
 
-		std::shared_ptr<Material> snakeMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 0,
+		std::shared_ptr<Material> snakeMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 0, 
+			Material::RenderDomain::Surface3D,
 			"shaders/lit_color.vert.spv",
 			"shaders/lit_color.frag.spv",
 			"snake");
@@ -38,7 +41,8 @@ namespace crsp {
 		snakeMaterial->writeUniform(&snakeMat);
 		snakeMaterial->build();
 
-		std::shared_ptr<Material> appleMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 0,
+		std::shared_ptr<Material> appleMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 0, 
+			Material::RenderDomain::Surface3D,
 			"shaders/lit_color.vert.spv",
 			"shaders/lit_color.frag.spv",
 			"apple");
@@ -46,6 +50,13 @@ namespace crsp {
 		appleMat.color = glm::vec4(1.0, 0.0, 0.0, 1.0);
 		appleMaterial->writeUniform(&appleMat);
 		appleMaterial->build();
+
+		std::shared_ptr<Material> textMaterial = resourceManager->createMaterial(0, 0, 
+			Material::RenderDomain::UI,
+			"shaders/text.vert.spv",
+			"shaders/text.frag.spv",
+			"text");
+		textMaterial->build();
 	}
 
 	void SnakeScene::spawnObjects()
@@ -53,7 +64,7 @@ namespace crsp {
 		// Create gameobjects
 		MeshRenderComponent* renderComp;
 
-		/*GameObject& vikingRoomObject = createGameObject();
+		GameObject& vikingRoomObject = createGameObject();
 		renderComp = vikingRoomObject.addComponent<MeshRenderComponent>();
 		renderComp->mesh = resourceManager->getMesh("viking_room");
 		renderComp->material = resourceManager->getMaterial("standard");
@@ -70,7 +81,7 @@ namespace crsp {
 		renderComp->mesh = resourceManager->getMesh("quad");
 		groundObject.transform.scale = glm::vec3(5.0f, 5.0f, 5.0f);
 		groundObject.transform.rotation = glm::vec3(glm::half_pi<float>(), 0.0f, 0.0f);
-		renderComp->material = resourceManager->getMaterial("snake");*/
+		renderComp->material = resourceManager->getMaterial("standard");
 
 		GameObject& snakeHead = createGameObject();
 		renderComp = snakeHead.addComponent<MeshRenderComponent>();
@@ -83,6 +94,11 @@ namespace crsp {
 		renderComp->mesh = resourceManager->getMesh("cube");
 		apple.transform.scale = glm::vec3(.5f);
 		renderComp->material = resourceManager->getMaterial("apple");
+
+		GameObject& text = createGameObject();
+		TextRenderComponent* textComp = text.addComponent<TextRenderComponent>();
+		textComp->material = resourceManager->getMaterial("text");
+		text.transform.scale.x = 1.0f;
 
 		snakeObj = &snakeHead;
 		appleObj = &apple;
@@ -151,8 +167,6 @@ namespace crsp {
 
 	void SnakeScene::update(float deltaTime, float totalTime)
 	{
-		Scene::update(deltaTime, totalTime);
-
 		glm::ivec2 move = glm::ivec2(0, 0);
 		if (inputSystem->isKeyPressed(GLFW_KEY_A) && moveDir != glm::ivec2(-1, 0)) move = glm::ivec2(-1, 0);
 		if (inputSystem->isKeyPressed(GLFW_KEY_D) && moveDir != glm::ivec2(1, 0)) move = glm::ivec2(1, 0);

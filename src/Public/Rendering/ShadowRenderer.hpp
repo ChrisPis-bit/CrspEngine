@@ -3,6 +3,7 @@
 #include "Pipeline.hpp"
 #include "FrameInfo.hpp"
 #include "SceneLogic/GameObject.hpp"
+#include "Rendering/MaterialRenderer.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE

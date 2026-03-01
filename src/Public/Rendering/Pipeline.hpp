@@ -22,6 +22,9 @@ namespace crsp {
 		VkPipelineLayout pipelineLayout = nullptr;
 		VkRenderPass renderPass = nullptr;
 		uint32_t subpass = 0;
+
+		VkVertexInputBindingDescription vertexInputBindingDescription;
+		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
 	};
 
 	class Pipeline {

@@ -5,13 +5,12 @@
 #include <memory>
 
 #include "Public/App.hpp"
-#include "SnakeGame/SnakeScene.hpp"
 
 int main()
 {
 	std::cout << "HelloWorld" << '\n';
 
-	crsp::App app(std::make_unique<crsp::SnakeScene>());
+	crsp::App app;
 
 	try {
 		app.run();

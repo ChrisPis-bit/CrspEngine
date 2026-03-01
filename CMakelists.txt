@@ -4,6 +4,7 @@ project(CrspEngine)
 set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory("libraries/glfw-3.4")
+add_subdirectory("libraries/freetype-2.14.1")
 
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 add_executable(${CMAKE_PROJECT_NAME} "${MY_SOURCES}" "src/main.cpp")
@@ -23,7 +24,7 @@ find_package(Vulkan REQUIRED)
 
 target_include_directories(CrspEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 
-target_link_libraries(CrspEngine PRIVATE glfw Vulkan::Vulkan)
+target_link_libraries(CrspEngine PRIVATE freetype glfw Vulkan::Vulkan)
 
 # Correct glslc path
 file(TO_CMAKE_PATH "$ENV{VULKAN_SDK}" VULKAN_SDK_PATH)

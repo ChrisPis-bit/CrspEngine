@@ -9,9 +9,9 @@
 #include <stb_image.h>
 
 namespace crsp {
-	Texture2D::Texture2D(Device& device, const std::string& filePath) : device(device)
+	Texture2D::Texture2D(Device& device, const Texture2D::Builder& builder) : device(device)
 	{
-		createTextureImage(filePath);
+		createTextureImage(builder);
 		createTextureImageView();
 		createTextureSampler();
 	}
@@ -35,18 +35,21 @@ namespace crsp {
 		return imageInfo;
 	}
 
-	void Texture2D::createTextureImage(const std::string& filePath)
+	std::unique_ptr<Texture2D> Texture2D::createTextureFromFile(Device& device, const std::string& filepath)
 	{
-		int texWidth, texHeight, texChannels;
-		stbi_uc* pixels = stbi_load((PROJECT_PATH + filePath).c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		Builder builder{};
+		builder.loadTexture(filepath);
+		auto texture = std::make_unique<Texture2D>(device, builder);
+		stbi_image_free(builder.data);
+		return texture;
+	}
 
-		VkDeviceSize imageSize = texWidth * texHeight * 4;
+	void Texture2D::createTextureImage(const Texture2D::Builder& builder)
+	{
+		VkDeviceSize imageSize = builder.width * builder.height * builder.channels;
 
-		mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
-
-		if (!pixels) {
-			throw std::runtime_error("failed to load texture image!");
-		}
+		format = builder.format;
+		mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(builder.width, builder.height)))) + 1;
 
 		Buffer stagingBuffer{ device,
 			imageSize, 
@@ -56,19 +59,17 @@ namespace crsp {
 		};
 
 		stagingBuffer.map();
-		stagingBuffer.writeToBuffer(pixels);
-
-		stbi_image_free(pixels);
+		stagingBuffer.writeToBuffer(builder.data);
 
 		VkImageCreateInfo imageInfo{};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageInfo.extent.width = static_cast<uint32_t>(texWidth);
-		imageInfo.extent.height = static_cast<uint32_t>(texHeight);
+		imageInfo.extent.width = static_cast<uint32_t>(builder.width);
+		imageInfo.extent.height = static_cast<uint32_t>(builder.height);
 		imageInfo.extent.depth = 1;
 		imageInfo.mipLevels = mipLevels;
 		imageInfo.arrayLayers = 1;
-		imageInfo.format = VK_FORMAT_R8G8B8A8_SRGB; // TODO: use device.findSupportedFormat() here
+		imageInfo.format = format; // TODO: use device.findSupportedFormat() here
 		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -77,16 +78,16 @@ namespace crsp {
 		imageInfo.flags = 0; // Optional
 		
 		device.createImageWithInfo(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
-		device.transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
-		device.copyBufferToImage(stagingBuffer.getBuffer(), textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight), 1);
+		device.transitionImageLayout(textureImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
+		device.copyBufferToImage(stagingBuffer.getBuffer(), textureImage, static_cast<uint32_t>(builder.width), static_cast<uint32_t>(builder.height), 1);
 		//device.transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mipLevels);
 
-		device.generateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels);
+		device.generateMipmaps(textureImage, format, builder.width, builder.height, mipLevels);
 	}
 
 	void Texture2D::createTextureImageView()
 	{
-		device.createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, textureImageView, mipLevels);
+		device.createImageView(textureImage, format, textureImageView, mipLevels);
 	}
 	void Texture2D::createTextureSampler()
 	{
@@ -116,5 +117,19 @@ namespace crsp {
 		if (vkCreateSampler(device.getDevice(), &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create texture sampler!");
 		}
+	}
+
+	void Texture2D::Builder::loadTexture(const std::string& filepath)
+	{
+		int texChannels;
+		stbi_uc* pixels = stbi_load((PROJECT_PATH + filepath).c_str(), &width, &height, &texChannels, STBI_rgb_alpha);
+		channels = 4; // for now hardcoded to 4.
+
+		if (!pixels) {
+			throw std::runtime_error("failed to load texture image!");
+		}
+
+		data = pixels;
+		format = VK_FORMAT_R8G8B8A8_SRGB;
 	}
 } // namespace

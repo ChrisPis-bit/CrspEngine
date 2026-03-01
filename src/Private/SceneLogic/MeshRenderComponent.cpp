@@ -1,18 +1,13 @@
 #include "SceneLogic/MeshRenderComponent.hpp"
 #include "SceneLogic/GameObject.hpp"
+#include "SceneLogic/Scene.hpp"
 
 namespace crsp {
-	void MeshRenderComponentSystem::update()
+	void MeshRenderComponent::render()
 	{
+		if (isActive()) owner.getScene().renderSurface(getRenderData());
 	}
-	void MeshRenderComponentSystem::lateUpdate()
-	{
-		// Collect all render data from this frame.
-		renderQueue.clear();
-		for (auto renderer : components) {
-			if(renderer->isActive()) renderQueue.push_back(renderer->getRenderData());
-		}
-	}
+
 	RenderObject MeshRenderComponent::getRenderData()
 	{
 		RenderObject renderObj;

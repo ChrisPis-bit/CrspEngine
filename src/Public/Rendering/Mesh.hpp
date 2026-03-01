@@ -12,6 +12,7 @@
 #include <memory>
 
 namespace crsp {
+
 	struct Vertex {
 		glm::vec3 position{};
 		glm::vec3 normal{};
@@ -27,28 +28,36 @@ namespace crsp {
 			return bindingDescription;
 		}
 
-		static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions() {
-			std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
+		static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
+			std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
 
-			attributeDescriptions[0].binding = 0;
-			attributeDescriptions[0].location = 0;
-			attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-			attributeDescriptions[0].offset = offsetof(Vertex, position);
+			attributeDescriptions.push_back({
+				0, // location
+				0, // binding
+				VK_FORMAT_R32G32B32_SFLOAT, // format
+				offsetof(Vertex, position) // offset
+				});
 
-			attributeDescriptions[1].binding = 0;
-			attributeDescriptions[1].location = 1;
-			attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-			attributeDescriptions[1].offset = offsetof(Vertex, normal);
+			attributeDescriptions.push_back({
+				1,
+				0,
+				VK_FORMAT_R32G32B32_SFLOAT,
+				offsetof(Vertex, normal)
+				});
 
-			attributeDescriptions[2].binding = 0;
-			attributeDescriptions[2].location = 2;
-			attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
-			attributeDescriptions[2].offset = offsetof(Vertex, color);
+			attributeDescriptions.push_back({
+				2,
+				0,
+				VK_FORMAT_R32G32B32_SFLOAT,
+				offsetof(Vertex, color)
+				});
 
-			attributeDescriptions[3].binding = 0;
-			attributeDescriptions[3].location = 3;
-			attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
-			attributeDescriptions[3].offset = offsetof(Vertex, texCoord);
+			attributeDescriptions.push_back({
+				3,
+				0,
+				VK_FORMAT_R32G32_SFLOAT,
+				offsetof(Vertex, texCoord)
+				});
 
 			return attributeDescriptions;
 		}
@@ -58,14 +67,62 @@ namespace crsp {
 		}
 	};
 
+	struct Vertex2D {
+		glm::vec2 position{};
+		glm::vec3 color{};
+		glm::vec2 texCoord{};
+
+		static VkVertexInputBindingDescription getBindingDescriptions() {
+			VkVertexInputBindingDescription bindingDescription{};
+			bindingDescription.binding = 0;
+			bindingDescription.stride = sizeof(Vertex2D);
+			bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+			return bindingDescription;
+		}
+
+		static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
+			std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+
+			attributeDescriptions.push_back({
+				0, // location
+				0, // binding
+				VK_FORMAT_R32G32_SFLOAT, // format
+				offsetof(Vertex2D, position) // offset
+				});
+
+			attributeDescriptions.push_back({
+				1,
+				0,
+				VK_FORMAT_R32G32B32_SFLOAT,
+				offsetof(Vertex2D, color)
+				});
+
+			attributeDescriptions.push_back({
+				2,
+				0,
+				VK_FORMAT_R32G32_SFLOAT,
+				offsetof(Vertex2D, texCoord)
+				});
+
+			return attributeDescriptions;
+		}
+
+		bool operator==(const Vertex2D& other) const {
+			return position == other.position && color == other.color && texCoord == other.texCoord;
+		}
+	};
+
 	class Mesh {
+	public:
 		struct Builder {
-			std::vector<Vertex> vertices{};
+			uint32_t vertexSize;
+			std::vector<uint8_t> vertexBuffer{};
 			std::vector<uint16_t> indices{};
 
 			void loadModel(const std::string& filepath);
+			void copyToVertexBuffer(void* src, uint32_t vertexCount, uint32_t vertexSize);
 		};
-	public:
 
 		Mesh(Device& device, const Mesh::Builder& builder);
 		~Mesh();
@@ -79,7 +136,7 @@ namespace crsp {
 		static std::unique_ptr<Mesh> createMeshFromFile(Device& device, const std::string& filepath);
 
 	private:
-		void createVertexBuffer(const std::vector<Vertex>& vertices);
+		void createVertexBuffer(const std::vector<uint8_t>& vertices, uint32_t vertexSize);
 		void createIndexBuffer(const std::vector<uint16_t>& indices);
 
 		bool hasIndexBuffer() { return indexCount > 3; };

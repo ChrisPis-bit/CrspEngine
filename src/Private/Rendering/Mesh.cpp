@@ -25,7 +25,7 @@ namespace std {
 namespace crsp {
 	Mesh::Mesh(Device& device, const Mesh::Builder& builder) : device(device)
 	{
-		createVertexBuffer(builder.vertices);
+		createVertexBuffer(builder.vertexBuffer, builder.vertexSize);
 		createIndexBuffer(builder.indices);
 	}
 
@@ -62,12 +62,11 @@ namespace crsp {
 		return std::make_unique<Mesh>(device, builder);
 	}
 
-	void Mesh::createVertexBuffer(const std::vector<Vertex>& vertices)
+	void Mesh::createVertexBuffer(const std::vector<uint8_t>& vertices, uint32_t vertexSize)
 	{
-		vertexCount = static_cast<uint32_t>(vertices.size());
+		vertexCount = static_cast<uint32_t>(vertices.size() / (vertexSize / sizeof(uint8_t)));
 		assert(vertexCount >= 3 && "Vertex count must be atleast 3");
 
-		uint32_t vertexSize = sizeof(vertices[0]);
 		uint32_t bufferSize = vertexCount * vertexSize;
 
 		// Creates staging buffer
@@ -136,8 +135,8 @@ namespace crsp {
 		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.c_str())) {
 			throw std::runtime_error(warn + err);
 		}
-
-		vertices.clear();
+		
+		std::vector<Vertex> vertices;
 		indices.clear();
 
 		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
@@ -184,5 +183,14 @@ namespace crsp {
 				indices.push_back(uniqueVertices[vertex]);
 			}
 		}
+
+		copyToVertexBuffer(vertices.data(), vertices.size(), sizeof(Vertex));
+	}
+
+	void Mesh::Builder::copyToVertexBuffer(void* src, uint32_t vertexCount, uint32_t vertexSize)
+	{
+		this->vertexSize = vertexSize;
+		vertexBuffer.resize(vertexCount * vertexSize);
+		std::memcpy(vertexBuffer.data(), src, vertexBuffer.size());
 	}
 } // namespace

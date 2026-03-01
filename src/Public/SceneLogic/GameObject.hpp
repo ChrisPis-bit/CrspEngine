@@ -5,7 +5,6 @@
 #include <glm/glm.hpp>
 #include "Rendering/Mesh.hpp"
 #include "Rendering/Material.hpp"
-#include "Rendering/MaterialRenderer.hpp"
 #include "SceneLogic/Component.hpp"
 
 #include <memory>
@@ -15,12 +14,14 @@
 namespace crsp {
 
 	struct Transform {
-		glm::vec3 position;
+		glm::vec3 position{};
 		glm::vec3 scale{ 1.0f, 1.0f, 1.0f };
-		glm::vec3 rotation;
+		glm::vec3 rotation{};
 
 		glm::mat4 calculateTransformationMatrix();
 		glm::mat4 calculateNormalMatrix();
+
+		glm::mat3 calculateTransformationMatrix2D();
 	};
 
 	class Scene;
@@ -33,9 +34,10 @@ namespace crsp {
 		GameObject& operator=(GameObject&&) = default;
 
 		GameObject(Scene& scene) : scene(scene) {}
+		virtual ~GameObject() = default;
 
-		virtual void start() {}
 		virtual void update() {}
+		virtual void postUpdate();
 
 		/// <summary>
 		/// Add component of type.
@@ -52,7 +54,6 @@ namespace crsp {
 			auto Ptr = std::make_unique<T>(*this, std::forward<Args>(args)...);
 			T* RawPtr = Ptr.get();
 			components.push_back(std::move(Ptr));
-			scene.getComponentSystemRegistry().registerComponent<T>(RawPtr);
 
 			return RawPtr;
 		}
@@ -75,6 +76,8 @@ namespace crsp {
 			}
 			return false;
 		}
+
+		Scene& getScene() { return scene; }
 
 		Transform transform{};
 		bool isActive = true;

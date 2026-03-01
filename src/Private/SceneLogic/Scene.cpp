@@ -1,43 +1,26 @@
 #include "SceneLogic/Scene.hpp"
 #include "SceneLogic/MeshRenderComponent.hpp"
+#include "SceneLogic/UIRenderComponent.hpp"
+#include <Rendering/UIRenderer.hpp>
 
 namespace crsp {
-	void Scene::start() {
-		for (auto& obj : gameObjects) {
-			obj->start();
-		}
+	Scene::~Scene()
+	{
 	}
-
-	void Scene::update(float deltaTime, float totalTime) {
-		for (auto& system : componentSystemRegistry.getSystems())
-		{
-			system.second->update();
-		}
+	void Scene::tick(float deltaTime, float totalTime)
+	{
+		renderData.renderObjects.clear();
+		renderData.UIrenderObjects.clear();
 
 		for (auto& obj : gameObjects) {
 			obj->update();
 		}
 
-		for (auto& system : componentSystemRegistry.getSystems())
-		{
-			system.second->lateUpdate();
-		}
-	}
+		update(deltaTime, totalTime);
 
-	void Scene::createComponentSystems()
-	{
-		// Register mesh rendering component system.
-		componentSystemRegistry.registerSystem<MeshRenderComponent>(std::make_unique<MeshRenderComponentSystem>());
-	}
-
-	std::vector<RenderObject> Scene::getRenderData()
-	{
-		// Retrieves render data from the render system, if it exists.
-		if (auto renderSystem = componentSystemRegistry.getSystem<MeshRenderComponent>()) {
-			return static_cast<MeshRenderComponentSystem*>(renderSystem)->copyRenderQueue();
+		for (auto& obj : gameObjects) {
+			obj->postUpdate();
 		}
-		else
-			return std::vector<RenderObject>();
 	}
 
 	GameObject& Scene::createGameObject()

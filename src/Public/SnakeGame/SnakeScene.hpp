@@ -5,6 +5,7 @@ namespace crsp {
 	class SnakeScene : public Scene {
 	public:
 		SnakeScene() = default;
+		~SnakeScene() = default;
 
 		void loadResources() override;
 		void spawnObjects() override;

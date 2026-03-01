@@ -4,9 +4,6 @@
 #include "Rendering/Mesh.hpp"
 #include "Rendering/Material.hpp"
 #include "Rendering/MaterialRenderer.hpp"
-
-#include "SceneLogic/ComponentSystem.hpp"
-
 #include <memory>
 
 namespace crsp {
@@ -16,27 +13,15 @@ namespace crsp {
 	class MeshRenderComponent : public Component {
 	public:
 		MeshRenderComponent(GameObject& owner) : Component(owner) {}
+		~MeshRenderComponent() = default;
 
 		std::shared_ptr<Mesh> mesh;
 		std::shared_ptr<Material> material;
 
-		RenderObject getRenderData();
-
-	};
-
-	/// <summary>
-	/// Handles returning all render data from render components.
-	/// </summary>
-	class MeshRenderComponentSystem : public ComponentSystem<MeshRenderComponent> {
-	public:
-		MeshRenderComponentSystem() = default;
-
-		void update() override;
-		void lateUpdate() override; 
-
-		std::vector<RenderObject> copyRenderQueue() { return renderQueue; }
+		void render() override;
 
 	private:
-		std::vector<RenderObject> renderQueue;
+		RenderObject getRenderData();
+
 	};
 }

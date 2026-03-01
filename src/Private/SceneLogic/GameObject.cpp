@@ -9,6 +9,13 @@
 #include <type_traits>
 
 namespace crsp {
+	void GameObject::postUpdate() {
+		for (auto& component : components)
+		{
+			component->render();
+		}
+	}
+
     glm::mat4 Transform::calculateTransformationMatrix()
     {
 #if 1
@@ -82,4 +89,25 @@ namespace crsp {
 				invScale.z * (c1 * c2),
 			} };
     }
+
+	glm::mat3 Transform::calculateTransformationMatrix2D()
+	{
+		const float c = glm::cos(rotation.z);
+		const float s = glm::sin(rotation.z);
+
+		return glm::mat4{
+			{
+				scale.x * c,   scale.x * s,   0.0f,   0.0f,
+			},
+			{
+			   -scale.y * s,   scale.y * c,   0.0f,   0.0f,
+			},
+			{
+				0.0f,          0.0f,          1.0f,   0.0f,
+			},
+			{
+				position.x,    position.y,    0.0f,   1.0f,
+			}
+		};
+	}
 } // namespace

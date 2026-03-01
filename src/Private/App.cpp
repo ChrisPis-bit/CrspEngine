@@ -9,6 +9,7 @@
 #include "Rendering/GlobalDescriptorsManager.hpp"
 #include "Rendering/ResourceManager.hpp"
 #include "SceneLogic/InputSystem.hpp"
+#include "SnakeGame/SnakeScene.hpp"
 
 //std
 #include <iostream>
@@ -23,13 +24,14 @@
 #include <glm/gtc/constants.hpp>
 
 namespace crsp {
-	App::App(std::unique_ptr<Scene> scene)
+	App::App()
 	{
-		currentScene = std::move(scene);
+		currentScene = new SnakeScene();
 	}
 
 	App::~App()
 	{
+		delete(currentScene);
 	}
 
 	void App::run()
@@ -43,7 +45,7 @@ namespace crsp {
 		ShadowRenderer shadowRenderer{ device };
 
 		// Creates global descriptor pool and global descriptor sets/layouts
-		GlobalDescriptorsManager globalDescriptorsManager(device, 5, 5, 1, shadowRenderer.descriptorInfo());
+		GlobalDescriptorsManager globalDescriptorsManager(device, 10, 10, 5, shadowRenderer.descriptorInfo());
 		shadowRenderer.preparePipeline(globalDescriptorsManager.getLightDescriptorSetLayout());
 
 		// Resource manager
@@ -57,6 +59,7 @@ namespace crsp {
 
 		// prepare render system
 		MaterialRenderer materialRenderer{ device };
+		UIRenderer uiRenderer{ device };
 
 		// Directional light
 		DirectionalLight mainLight{};
@@ -83,7 +86,7 @@ namespace crsp {
 			lastTime = newTime;
 
 			// Update scene
-			currentScene->update(deltaTime, currentTime);
+			currentScene->tick(deltaTime, currentTime);
 
 			// Camera movement
 			float aspect = renderer.getAspectRatio();
@@ -110,7 +113,7 @@ namespace crsp {
 				};
 
 				// Gather render data from game objects.
-				std::vector<RenderObject> renderObjects = currentScene->getRenderData();
+				RenderData renderData = currentScene->getRenderData();
 
 				// update UBO
 				GlobalUBO ubo{};
@@ -122,13 +125,13 @@ namespace crsp {
 
 				// shadow rendering
 				shadowRenderer.beginShadowRenderPass(commandBuffer);
-				shadowRenderer.draw(frameInfo, renderObjects);
+				shadowRenderer.draw(frameInfo, renderData.renderObjects);
 				shadowRenderer.endShadowRenderPass(commandBuffer);
 
 				// main rendering
 				renderer.beginSwapChainRenderPass(commandBuffer);
-
-				materialRenderer.render(frameInfo, renderObjects);
+				materialRenderer.render(frameInfo, renderData.renderObjects);
+				uiRenderer.render(frameInfo, renderData.UIrenderObjects);
 
 				renderer.endSwapChainRenderPass(commandBuffer);
 				renderer.endFrame();
