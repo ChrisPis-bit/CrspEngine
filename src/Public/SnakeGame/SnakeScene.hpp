@@ -1,15 +1,19 @@
 #pragma once
 #include "SceneLogic/Scene.hpp"
 #include "ECS/Systems/MeshRenderSystem.hpp"
+#include "SnakeComponents.hpp"
 
 namespace crsp {
+	/// <summary>
+	/// Example scene showcasing a basic implementation of the game Snake.
+	/// </summary>
 	class SnakeScene : public Scene {
 	public:
-		SnakeScene() = default;
 		~SnakeScene() = default;
 
 		void loadResources() override;
-		void spawnObjects() override;
+		void registerSystems() override;
+		void spawnEntities() override;
 		void start() override;
 		void update(float deltaTime, float totalTime) override;
 		void updateCameraAspect(float aspectRatio) override;
@@ -20,19 +24,9 @@ namespace crsp {
 
 		std::shared_ptr<MeshRenderSystem> meshRenderSystem;
 
-		uint32_t gridWidth = 12;
-		uint32_t gridHeight = 12;
-		float moveInterval = .5f;
-		float moveTimer = 0;
+		Grid grid{ 12, 12 };
 
-		glm::ivec2 snakePos;
-		glm::ivec2 moveDir;
-		glm::ivec2 applePos;
-
-		std::vector<Entity> snakeSegments;
-		std::vector<glm::ivec2> segmentPositions;
-
-		Entity snakeObj;
-		Entity appleObj;
+		Entity snakeEntity;
+		Entity appleEntity;
 	};
 }

@@ -1,5 +1,8 @@
 #include "SnakeGame/SnakeScene.hpp"
+#include "SnakeGame/SnakeComponents.hpp"
 #include "ECS/Systems/MeshRenderSystem.hpp"
+#include "SnakeGame/Systems/GridTransformSystem.hpp"
+#include "SnakeGame/Systems/SnakeControllerSystem.hpp"
 #include "Utils.hpp"
 
 #include <memory>
@@ -56,38 +59,36 @@ namespace crsp {
 			"shaders/text.frag.spv",
 			"text");
 		textMaterial->build();
-
-		// register systems
-		meshRenderSystem = entityManager.registerSystem<MeshRenderSystem>();		
 	}
 
-	void SnakeScene::spawnObjects()
+	void SnakeScene::registerSystems()
 	{
-		//for (size_t i = 0; i < 10; i++)
-		//{
-		//	Entity entity = entityManager.createEntity();
-		//	Transform* transform = entityManager.addComponent<Transform>(entity);
-		//	transform->position = glm::vec3(i * 2.6f, 0.0f, 0.0f);
-		//	MeshRender* meshRender = entityManager.addComponent<MeshRender>(entity);
-		//	meshRender->material = resourceManager->getMaterial("apple");
-		//	meshRender->mesh = resourceManager->getMesh("cube");
-		//}
+		// register systems
+		meshRenderSystem = entityManager.registerSystem<MeshRenderSystem>();
+		entityManager.registerSystem<SnakeControllerSystem>(grid, *inputSystem, *resourceManager);
+		entityManager.registerSystem<GridTransformSystem>(grid);
+	}
 
-		snakeObj = entityManager.createEntity();
-		Transform* transform = entityManager.addComponent<Transform>(snakeObj);
+	void SnakeScene::spawnEntities()
+	{
+		// Create initial entities
+		appleEntity = entityManager.createEntity();
+		Transform* transform = entityManager.addComponent<Transform>(appleEntity);
 		transform->scale = glm::vec3(.5f);
-		MeshRender* meshRender = entityManager.addComponent<MeshRender>(snakeObj);
-		meshRender->material = resourceManager->getMaterial("snake");
-		meshRender->mesh = resourceManager->getMesh("cube");
+		MeshRender* meshRender = entityManager.addComponent<MeshRender>(appleEntity);
+		meshRender->material = resourceManager->getMaterial("apple").get();
+		meshRender->mesh = resourceManager->getMesh("cube").get();
+		entityManager.addComponent<GridTransform>(appleEntity);
 
-		appleObj = entityManager.createEntity();
-		transform = entityManager.addComponent<Transform>(appleObj);
+
+		snakeEntity = entityManager.createEntity();
+		transform = entityManager.addComponent<Transform>(snakeEntity);
 		transform->scale = glm::vec3(.5f);
-		meshRender = entityManager.addComponent<MeshRender>(appleObj);
-		meshRender->material = resourceManager->getMaterial("apple");
-		meshRender->mesh = resourceManager->getMesh("cube");
-
-
+		meshRender = entityManager.addComponent<MeshRender>(snakeEntity);
+		meshRender->material = resourceManager->getMaterial("snake").get();
+		meshRender->mesh = resourceManager->getMesh("cube").get();
+		entityManager.addComponent<GridTransform>(snakeEntity);
+		entityManager.addComponent<SnakeHead>(snakeEntity)->apple = appleEntity;
 		//GameObject& text = createGameObject();
 		//TextRenderComponent* textComp = text.addComponent<TextRenderComponent>();
 		//textComp->material = resourceManager->getMaterial("text");
@@ -127,95 +128,32 @@ namespace crsp {
 
 	void SnakeScene::reset()
 	{
-		snakePos = glm::ivec2(0);
-		applePos = glm::ivec2(gridWidth / 2, gridHeight / 2);
+		// Reset snake
+		SnakeHead* snakeHead = entityManager.getComponent<SnakeHead>(snakeEntity);
+		snakeHead->hit = false;
+		snakeHead->moveDir = glm::ivec2(0);
 
-		segmentPositions.clear();
+		// Reset positions
+		entityManager.getComponent<GridTransform>(snakeEntity)->gridPosition = glm::ivec2(0);
+		entityManager.getComponent<GridTransform>(appleEntity)->gridPosition = glm::ivec2(grid.width / 2, grid.height / 2);
 
-		for (auto& segment: snakeSegments)
+		// Destroy segments
+		for (auto& segment: snakeHead->segments)
 		{
 			entityManager.destroyEntity(segment);
 		}
-		snakeSegments.clear();
-
-		moveDir = glm::ivec2(0);
-		moveTimer = 0;
+		snakeHead->segments.clear();
 	}
 
 	void SnakeScene::update(float deltaTime, float totalTime)
 	{
+		// Game over when the snake hits a wall or itself
+		if (entityManager.getComponent<SnakeHead>(snakeEntity)->hit)
+			gameOver();
+
 		for (auto& renderObj : meshRenderSystem->renderObjects)
 		{
-			renderData.renderObjects.push_back(renderObj);
-
+			renderSurface(renderObj);
 		}
-
-		glm::ivec2 move = glm::ivec2(0, 0);
-		if (inputSystem->isKeyPressed(GLFW_KEY_A) && moveDir != glm::ivec2(-1, 0)) move = glm::ivec2(-1, 0);
-		if (inputSystem->isKeyPressed(GLFW_KEY_D) && moveDir != glm::ivec2(1, 0)) move = glm::ivec2(1, 0);
-		if (inputSystem->isKeyPressed(GLFW_KEY_W) && moveDir != glm::ivec2(0, 1)) move = glm::ivec2(0, 1);
-		if (inputSystem->isKeyPressed(GLFW_KEY_S) && moveDir != glm::ivec2(0, -1)) move = glm::ivec2(0, -1);
-
-		if (move != glm::ivec2(0, 0) && move != -moveDir)
-			moveDir = move;
-
-		moveTimer += deltaTime;
-		if (moveTimer >= moveInterval) {
-			moveTimer = 0;
-
-
-			glm::ivec2 lastSegmentPos = segmentPositions.size() > 0 ? segmentPositions.back() : snakePos;
-
-			// move segments
-			for (int i = segmentPositions.size() - 1; i >= 0; i--)
-			{
-				if (i - 1 >= 0) {
-					segmentPositions[i] = segmentPositions[i - 1];
-				}
-				else {
-					segmentPositions[i] = snakePos;
-				}
-			}
-
-			snakePos += moveDir;
-
-			if (snakePos == applePos) {
-				applePos = glm::ivec2(randomRange(0, gridWidth + 1), randomRange(0, gridHeight + 1));
-
-				segmentPositions.push_back(lastSegmentPos);
-				Entity newSegment = entityManager.createEntity();
-				entityManager.addComponent<Transform>(newSegment)->scale = glm::vec3(.5f);
-				MeshRender* meshRender = entityManager.addComponent<MeshRender>(newSegment);
-				meshRender->material = resourceManager->getMaterial("snake");
-				meshRender->mesh = resourceManager->getMesh("cube");
-				snakeSegments.push_back(newSegment);
-			}
-
-			// Check collision with grid edges
-			if (snakePos.x < 0 || snakePos.x > gridWidth
-				|| snakePos.y < 0 || snakePos.y > gridHeight)
-				gameOver();
-
-			// Check collision with self
-			for (auto& segmentPosition : segmentPositions)
-			{
-				if(snakePos == segmentPosition){
-					gameOver();
-					break;
-				}
-			}
-		}
-
-		for (size_t i = 0; i < segmentPositions.size(); i++)
-		{
-			Transform* transform = entityManager.getComponent<Transform>(snakeSegments[i]);
-			transform->position = glm::vec3(segmentPositions[i].x - gridWidth / 2.0f, 0, -segmentPositions[i].y + gridHeight / 2.0f);
-		}
-
-		Transform* transform = entityManager.getComponent<Transform>(snakeObj);
-		transform->position = glm::vec3(snakePos.x - gridWidth / 2.0f, 0, -snakePos.y + gridHeight / 2.0f);
-
-		transform = entityManager.getComponent<Transform>(appleObj);
-		transform->position = glm::vec3(applePos.x - gridWidth / 2.0f, 0, -applePos.y + gridHeight / 2.0f);
 	}
 }

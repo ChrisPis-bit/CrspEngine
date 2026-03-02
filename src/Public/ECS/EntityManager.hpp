@@ -5,10 +5,14 @@
 
 #include <vector>
 #include <iostream>
+#include <type_traits>
 
 namespace crsp {
 	class EntityManager {
 	public:
+		EntityManager() = default;
+		~EntityManager() = default;
+
 		struct EntityDesc {
 			Entity entity;
 			ComponentMask mask;
@@ -17,16 +21,16 @@ namespace crsp {
 		Entity createEntity();
 		void destroyEntity(Entity entity);
 
-		template<typename T>
-		T* addComponent(Entity entity) {
+		template<typename T, typename... Args>
+		T* addComponent(Entity entity, Args&&... args) {
 			int componentId = getId<T>();
 			size_t componentPoolsAmount = componentPools.size();
 
 			if (componentPoolsAmount <= componentId) {
 				componentPools.resize(componentPoolsAmount + 1);
-				componentPools[componentId] = new ComponentPool(sizeof(T));
+				componentPools[componentId] = std::make_unique<ComponentPool>(sizeof(T));
 			}
-			T* newComponent = new (componentPools[componentId]->get(entity.getIndex())) T();
+			T* newComponent = new (componentPools[componentId]->get(entity.getIndex())) T(std::forward<Args>(args)...);
 
 			entities[entity.getIndex()].mask.set(componentId);
 			systemManager.entityComponentMaskChanged(entity, entities[entity.getIndex()].mask);
@@ -54,8 +58,8 @@ namespace crsp {
 			systemManager.entityComponentMaskChanged(entity, entities[entity.getIndex()].mask);
 		}
 
-		template<typename T>
-		std::shared_ptr<T> registerSystem() { return systemManager.registerSystem<T>(*this); }
+		template<typename T, typename... Args>
+		std::shared_ptr<T> registerSystem(Args&&... args) { return systemManager.registerSystem<T>(*this, std::forward<Args>(args)...); }
 
 		void updateSystems(float deltaTime, float currentTime) { systemManager.updateSystems(deltaTime, currentTime); }
 
@@ -65,7 +69,7 @@ namespace crsp {
 		SystemManager systemManager{};
 
 		std::vector<EntityDesc> entities;
-		std::vector<ComponentPool*> componentPools;
+		std::vector<std::unique_ptr<ComponentPool>> componentPools;
 		std::vector<EntityIndex> freeEntities;
 	};
 }

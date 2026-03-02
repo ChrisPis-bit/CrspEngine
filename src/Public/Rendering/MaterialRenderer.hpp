@@ -16,8 +16,8 @@ namespace crsp {
 	};
 
 	struct RenderObject {
-		std::shared_ptr<Mesh> mesh;
-		std::shared_ptr<Material> material;
+		Mesh* mesh;
+		Material* material;
 		glm::mat4 transformMatrix {1.0f};
 		glm::mat3 normalMatrix {1.0f};
 	};

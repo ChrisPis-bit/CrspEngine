@@ -2,9 +2,6 @@
 #include <Rendering/UIRenderer.hpp>
 
 namespace crsp {
-	Scene::~Scene()
-	{
-	}
 	void Scene::tick(float deltaTime, float totalTime)
 	{
 		renderData.renderObjects.clear();

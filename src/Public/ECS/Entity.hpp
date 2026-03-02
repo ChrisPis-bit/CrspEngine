@@ -22,7 +22,8 @@ namespace crsp {
 	typedef unsigned long long EntityID;
 	typedef unsigned int EntityIndex;
 	typedef unsigned int EntityVersion;
-	#define INVALID_ENTITY_ID EntityIndex(-1);
+	#define INVALID_ENTITY_ID EntityIndex(-1)
+	#define INVALID_ENTITY Entity{EntityIndex(-1)}
 
 	struct Entity {
 		EntityID id;

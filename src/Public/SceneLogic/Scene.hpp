@@ -21,21 +21,24 @@ namespace crsp {
 	class Scene {
 	public:
 		Scene() = default;
-		~Scene();
+		virtual ~Scene() = default;
 
 		void init(ResourceManager* resourceManager, InputSystem* inputSystem) {
 			this->resourceManager = resourceManager;
 			this->inputSystem = inputSystem;
 
 			loadResources();
-			spawnObjects();
+			registerSystems();
+			spawnEntities();
 		}
 
-		virtual void loadResources() = 0;
-		virtual void spawnObjects() = 0;
-		virtual void start() {}
 		void tick(float deltaTime, float totalTime);
-		virtual void update(float deltaTime, float totalTime) = 0;
+
+		virtual void loadResources() = 0;
+		virtual void registerSystems() = 0;
+		virtual void spawnEntities() = 0;
+		virtual void start() {}
+		virtual void update(float deltaTime, float totalTime) {};
 
 		virtual void updateCameraAspect(float aspectRatio) {
 			camera.setPerspectiveProjection(glm::radians(50.0f), aspectRatio, .1f, 100.0f);
