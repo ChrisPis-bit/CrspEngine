@@ -1,6 +1,8 @@
 #include "SnakeGame/Systems/SnakeControllerSystem.hpp"
 #include "Utils.hpp"
 
+#include <format>
+
 namespace crsp {
 	void SnakeControllerSystem::update(float deltaTime, float currentTime)
 	{
@@ -64,6 +66,9 @@ namespace crsp {
 
 					// Add new segment
 					snakeHead->segments.push_back(createSnakeSegment(lastSegmentPos));
+
+					// Update score
+					entityManager.getComponent<TextRender>(snakeHead->scoreText)->set(SnakeHead::SCORE_TEXT + std::to_string(snakeHead->segments.size()));
 				}
 
 				// Check collision with grid edges

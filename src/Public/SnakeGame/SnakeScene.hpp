@@ -30,5 +30,6 @@ namespace crsp {
 
 		Entity snakeEntity;
 		Entity appleEntity;
+		Entity scoreTextEntity;
 	};
 }

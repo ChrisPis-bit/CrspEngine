@@ -128,7 +128,6 @@ namespace crsp {
 			glm::vec2 realScale = transform->scale;
 			glm::vec2 realPosition = transform->position;
 			if (curAspect > baseAspect) {
-				//realScale.y *= transform->height;
 				realPosition.y += (1 - transform->height);
 				realScale.x *= transform->width / aspectCorrection;
 			}
@@ -143,7 +142,6 @@ namespace crsp {
 			renderObject.mesh = textRender->mesh;
 			renderObject.transform.position = realPosition;
 			renderObject.transform.scale = realScale;
-			//renderObject.transform.scale = glm::vec2(1.0f, 1.0f);
 			renderObject.transform.rotation = transform->rotation;
 			renderObjects.push_back(renderObject);
 		}

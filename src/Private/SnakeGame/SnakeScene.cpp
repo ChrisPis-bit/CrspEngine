@@ -90,6 +90,18 @@ namespace crsp {
 		meshRender->mesh = resourceManager->getMesh("cube");
 		entityManager.addComponent<GridTransform>(appleEntity);
 
+		// Text
+		scoreTextEntity = entityManager.createEntity();
+		Transform2D* transform2D = entityManager.addComponent<Transform2D>(scoreTextEntity);
+		transform2D->width = 0.5f;
+		transform2D->height = 0.2f;
+		transform2D->position = glm::vec2(0.0f, -0.5f);
+		TextRender* textRender = entityManager.addComponent<TextRender>(scoreTextEntity, 512, resourceManager->createMesh(Mesh::Builder(), Mesh::Type::DYNAMIC));
+		textRender->setAlignment(TextRender::Alignment::CENTER);
+		textRender->font = resourceManager->getFont("pixelated");
+		textRender->setFontScale(0.05f);
+		textRender->material = resourceManager->getMaterial("pixelated_font");
+		textRender->set("Hello! this is a test bruv. I got many a words , heterogondorea Ima write here lolll, hello ahahha hello lolll hiii");
 
 		snakeEntity = entityManager.createEntity();
 		transform = entityManager.addComponent<Transform>(snakeEntity);
@@ -98,21 +110,9 @@ namespace crsp {
 		meshRender->material = resourceManager->getMaterial("snake");
 		meshRender->mesh = resourceManager->getMesh("cube");
 		entityManager.addComponent<GridTransform>(snakeEntity);
-		entityManager.addComponent<SnakeHead>(snakeEntity)->apple = appleEntity;
+		entityManager.addComponent<SnakeHead>(snakeEntity, appleEntity, scoreTextEntity);
 
-		// Text
-		Entity textTest = entityManager.createEntity();
-		Transform2D* transform2D = entityManager.addComponent<Transform2D>(textTest);
-		transform2D->width = 0.5f;
-		transform2D->height = 0.2f;
-		transform2D->position = glm::vec2(0.0f, -0.5f);
-
-		TextRender* textRender = entityManager.addComponent<TextRender>(textTest, 512, resourceManager->createMesh(Mesh::Builder(), Mesh::Type::DYNAMIC));
-		textRender->setAlignment(TextRender::Alignment::CENTER);
-		textRender->font = resourceManager->getFont("pixelated");
-		textRender->setFontScale(0.05f);
-		textRender->material = resourceManager->getMaterial("pixelated_font");
-		textRender->set("Hello! this is a test bruv. I got many a words , heterogondorea Ima write here lolll, hello ahahha hello lolll hiii");
+		
 	}
 
 	void SnakeScene::start()
@@ -163,6 +163,9 @@ namespace crsp {
 			entityManager.destroyEntity(segment);
 		}
 		snakeHead->segments.clear();
+
+		// Reset text
+		entityManager.getComponent<TextRender>(scoreTextEntity)->set(SnakeHead::SCORE_TEXT + std::to_string(0));
 	}
 
 	void SnakeScene::update(float deltaTime, float totalTime)
