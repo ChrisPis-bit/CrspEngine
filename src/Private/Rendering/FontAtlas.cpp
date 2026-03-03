@@ -6,7 +6,7 @@
 #include FT_FREETYPE_H
 
 namespace crsp {
-	FontAtlas::FontAtlas(Device& device, uint32_t fontSize, uint32_t atlasSize, const std::string& fontPath, const char startChar, const char endChar) : size(atlasSize), fontSize(fontSize) {
+	FontAtlas::FontAtlas(Device& device, uint32_t fontSize, uint32_t atlasSize, const std::string& fontPath, Texture2D::Filter filter, const char startChar, const char endChar) : size(atlasSize), fontSize(fontSize) {
 		FT_Library ft;
 		if (FT_Init_FreeType(&ft)) {
 			throw std::runtime_error("Could not init FreeType library");
@@ -87,6 +87,7 @@ namespace crsp {
 		atlasTextureBuilder.height = atlasSize;
 		atlasTextureBuilder.channels = 1;
 		atlasTextureBuilder.format = VK_FORMAT_R8_UNORM;
+		atlasTextureBuilder.filter = filter;
 		atlasTextureBuilder.data = bitmap.data();
 		atlas = std::make_unique<Texture2D>(device, atlasTextureBuilder);
 	}

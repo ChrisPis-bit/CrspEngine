@@ -35,10 +35,11 @@ namespace crsp {
 		return imageInfo;
 	}
 
-	std::unique_ptr<Texture2D> Texture2D::createTextureFromFile(Device& device, const std::string& filepath)
+	std::unique_ptr<Texture2D> Texture2D::createTextureFromFile(Device& device, const std::string& filepath, Filter filter)
 	{
 		Builder builder{};
 		builder.loadTexture(filepath);
+		builder.filter = filter;
 		auto texture = std::make_unique<Texture2D>(device, builder);
 		stbi_image_free(builder.data);
 		return texture;
@@ -48,13 +49,25 @@ namespace crsp {
 	{
 		VkDeviceSize imageSize = builder.width * builder.height * builder.channels;
 
+		// Filters
+		switch (builder.filter) {
+		case Filter::LINEAR:
+			filter = VK_FILTER_LINEAR;
+			break;
+		case Filter::NEAREST:
+			filter = VK_FILTER_NEAREST;
+			break;
+		default:
+			filter = VK_FILTER_LINEAR;
+		}
+
 		format = builder.format;
 		mipLevels = static_cast<uint32_t>(std::floor(std::log2(std::max(builder.width, builder.height)))) + 1;
 
 		Buffer stagingBuffer{ device,
-			imageSize, 
-			1, 
-			VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+			imageSize,
+			1,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 		};
 
@@ -76,7 +89,7 @@ namespace crsp {
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageInfo.flags = 0; // Optional
-		
+
 		device.createImageWithInfo(imageInfo, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
 		device.transitionImageLayout(textureImage, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
 		device.copyBufferToImage(stagingBuffer.getBuffer(), textureImage, static_cast<uint32_t>(builder.width), static_cast<uint32_t>(builder.height), 1);
@@ -98,13 +111,13 @@ namespace crsp {
 
 		VkSamplerCreateInfo samplerInfo{};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		samplerInfo.magFilter = VK_FILTER_LINEAR;
-		samplerInfo.minFilter = VK_FILTER_LINEAR;
+		samplerInfo.magFilter = filter;
+		samplerInfo.minFilter = filter;
 		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
 		samplerInfo.anisotropyEnable = VK_TRUE;
-		samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy; 
+		samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
 		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 		samplerInfo.unnormalizedCoordinates = VK_FALSE;
 		samplerInfo.compareEnable = VK_FALSE;

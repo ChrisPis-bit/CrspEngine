@@ -6,12 +6,18 @@
 namespace crsp {
 	class Texture2D {
 	public:
+		enum class Filter {
+			LINEAR,
+			NEAREST,
+		};
+
 		struct Builder {
 			int width;
 			int height;
 			int channels;
 			void* data;
 			VkFormat format;
+			Filter filter;
 
 			void loadTexture(const std::string& filepath);
 		};
@@ -21,7 +27,7 @@ namespace crsp {
 
 		VkDescriptorImageInfo descriptorInfo();
 
-		static std::unique_ptr<Texture2D> createTextureFromFile(Device& device, const std::string& filepath);
+		static std::unique_ptr<Texture2D> createTextureFromFile(Device& device, const std::string& filepath, Filter filter = Filter::LINEAR);
 
 	private:
 		void createTextureImage(const Texture2D::Builder& builder);
@@ -35,6 +41,7 @@ namespace crsp {
 		VkImage textureImage;
 		VkDeviceMemory textureImageMemory;
 		VkFormat format;
+		VkFilter filter;
 
 		uint32_t mipLevels;
 	};

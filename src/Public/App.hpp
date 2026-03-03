@@ -24,8 +24,8 @@ namespace crsp {
 
 		void run();
 
-		const int width = 800;
-		const int height = 600;
+		const int width = 1600;
+		const int height = 900;
 
 	private:
 		void mainLoop();

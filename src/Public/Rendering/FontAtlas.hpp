@@ -15,7 +15,7 @@ namespace crsp {
 
 	class FontAtlas {
 	public:
-		FontAtlas(Device& device, uint32_t fontSize, uint32_t atlasSize, const std::string& fontPath, const char startChar = 32, const char endChar = 126);
+		FontAtlas(Device& device, uint32_t fontSize, uint32_t atlasSize, const std::string& fontPath, Texture2D::Filter filter = Texture2D::Filter::LINEAR, const char startChar = 32, const char endChar = 126);
 		~FontAtlas();
 
 		GlyphInfo getGlyphInfo(char c) { return glyphs[c]; }

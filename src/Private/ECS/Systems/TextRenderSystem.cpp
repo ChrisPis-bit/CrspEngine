@@ -9,6 +9,8 @@ namespace crsp {
 		renderObjects.clear();
 		//const float baseAspect = 1.0f / 1.0f;
 		const float baseAspect = 16.0f / 9.0f;
+		const float curAspect = window.getAspect();
+		const float aspectCorrection = curAspect / baseAspect;
 
 		for (auto const& entity : entities)
 		{
@@ -16,41 +18,56 @@ namespace crsp {
 			TextRender* textRender = entityManager.getComponent<TextRender>(entity);
 			float aspect = transform->getAspect();
 
-			if (textRender->textUpdated && textRender->text.size() > 0) {
+			if ((textRender->textUpdated || window.wasResized()) && textRender->text.size() > 0) {
 				// Calculate aspect changes.
-				const float fontSize = (float)textRender->font->getFontSize();
+				const float fontSize = (float)textRender->font->getFontSize() / textRender->fontScale;
 
 				size_t characterCount = textRender->text.size();
-				std::vector<Vertex2D> vertices;
-				std::vector<uint16_t> indices;
-				vertices.resize(characterCount * 4);
-				indices.resize(characterCount * 6);
+				if (characterCount > textRender->maxCharacters)characterCount = textRender->maxCharacters; // Don't exceed max character range
 
-				// Initiate index buffer
+				std::vector<Vertex2D> vertices;
+				vertices.resize(textRender->maxCharacters * 4); // allocate for all needed characters
+
+				// Max span for text
+				const float maxSpan = (fontSize) * (transform->width * baseAspect); // TODO
+
+				// Calculate line spans
+				std::vector<int> spans{ 0 };
+				size_t currentSpan = 0;
 				for (size_t i = 0; i < characterCount; i++)
 				{
-					uint16_t indexBase = i * 6;
-					uint16_t vertBase = i * 4;
-					indices[indexBase] = vertBase;
-					indices[indexBase + 1] = vertBase + 1;
-					indices[indexBase + 2] = vertBase + 2;
+					char character = textRender->text[i];
+					GlyphInfo glyph = textRender->font->getGlyphInfo(character);
+					int glyphSpan = glyph.bearingX + glyph.width;
 
-					indices[indexBase + 3] = vertBase + 2;
-					indices[indexBase + 4] = vertBase + 3;
-					indices[indexBase + 5] = vertBase;
+					if (spans[currentSpan] == 0 || spans[currentSpan] + glyphSpan <= maxSpan) {
+						spans[currentSpan] += glyph.advance;
+					}
+					else {
+						currentSpan++;
+						spans.push_back(glyphSpan);
+					}
 				}
 
 				// Align vertices to glyphs
-				glm::vec2 pen(0.0f, textRender->font->getYAdvance());
-				const float maxSpan = fontSize / textRender->fontScale * aspect * baseAspect; // TODO
+				// Change pen start depedning on alignment mode
+				glm::vec2 pen(textRender->alignment == TextRender::Alignment::CENTER ? (maxSpan - spans[0]) / 2.0f : 0, textRender->font->getYAdvance());
+
+				currentSpan = 0;
+				float currentLineSpan = 0;
 				for (size_t i = 0; i < characterCount; i++)
 				{
 					char character = textRender->text[i];
 					GlyphInfo glyph = textRender->font->getGlyphInfo(character);
 
 					// Check next line
-					if ((pen.x + glyph.bearingX + glyph.width) > maxSpan) {
-						pen.x = 0;
+					if ((currentLineSpan + glyph.bearingX + glyph.width) > spans[currentSpan]) {
+						currentSpan++;
+
+						// Change pen start depedning on alignment mode
+						pen.x = textRender->alignment == TextRender::Alignment::CENTER ? (maxSpan - spans[currentSpan]) / 2.0f : 0;
+
+						currentLineSpan = 0;
 						pen.y += textRender->font->getYAdvance();
 					}
 
@@ -82,57 +99,26 @@ namespace crsp {
 					vertTL.color = glm::vec3(1);
 					vertTL.texCoord = glm::vec2(glyph.u0, glyph.v1);
 
+					currentLineSpan += glyph.advance;
 					pen.x += glyph.advance;
 				}
 
+				// Correct to -1 -> 1 space
 				for (auto& vertex : vertices)
 				{
-					vertex.position -= maxSpan / 2;
-					vertex.position /= maxSpan;
+					vertex.position /= fontSize;
+					vertex.position.x /= baseAspect * transform->width;
 					vertex.position *= 2;
-					//
+					vertex.position -= 1.0f;
 				}
 
-
-
-
-				std::vector<Vertex2D> testvertices =
-				{
-					// Bottom-left
-					{ { -1.0f, -1.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f } },
-
-					// Bottom-right
-					{ {  1.0f, -1.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },
-
-					// Top-right
-					{ {  1.0f,  1.0f }, { 1.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } },
-
-					// Top-left
-					{ { -1.0f,  1.0f }, { 1.0f, 1.0f, 1.0f }, { 0.0f, 1.0f } },
-				};
-
-				std::vector<uint16_t> testindices =
-				{
-					0, 1, 2,   // First triangle
-					2, 3, 0    // Second triangle
-				};
-
-
 				// Update mesh
-				//float vertexSize = sizeof(Vertex2D);
-				//std::vector<uint8_t> rawDataVector;
-				//rawDataVector.resize(testvertices.size() * vertexSize);
-				//std::memcpy(rawDataVector.data(), testvertices.data(), rawDataVector.size());
-
-				//textRender->mesh->writeVertices(rawDataVector, vertexSize);
-				//textRender->mesh->writeIndices(testindices);
 				float vertexSize = sizeof(Vertex2D);
 				std::vector<uint8_t> rawDataVector;
 				rawDataVector.resize(vertices.size() * vertexSize);
 				std::memcpy(rawDataVector.data(), vertices.data(), rawDataVector.size());
 
 				textRender->mesh->writeVertices(rawDataVector, vertexSize);
-				textRender->mesh->writeIndices(indices);
 
 				textRender->textUpdated = false;
 			}
@@ -140,21 +126,22 @@ namespace crsp {
 			// Render
 			// Applies the aspect ratio to the text.
 			glm::vec2 realScale = transform->scale;
-			const float curAspect = window.getAspect();
-			const float aspectCorrection = curAspect / baseAspect;
+			glm::vec2 realPosition = transform->position;
 			if (curAspect > baseAspect) {
-				realScale.y *= transform->height;
+				//realScale.y *= transform->height;
+				realPosition.y += (1 - transform->height);
 				realScale.x *= transform->width / aspectCorrection;
 			}
 			else {
 				realScale.x *= transform->width;
-				realScale.y *= transform->height * aspectCorrection;
+				realScale.y *= aspectCorrection;
+				realPosition.y += aspectCorrection - (transform->height * aspectCorrection);
 			}
 
 			UIRenderObject renderObject;
 			renderObject.material = textRender->material;
 			renderObject.mesh = textRender->mesh;
-			renderObject.transform.position = transform->position;
+			renderObject.transform.position = realPosition;
 			renderObject.transform.scale = realScale;
 			//renderObject.transform.scale = glm::vec2(1.0f, 1.0f);
 			renderObject.transform.rotation = transform->rotation;

@@ -26,7 +26,7 @@ namespace crsp {
 		std::shared_ptr<Texture2D> loadTexture(std::string filePath, std::string identifier);
 		std::shared_ptr<Texture2D> getTexture(std::string identifier);
 
-		std::shared_ptr<Mesh> createMesh(Mesh::Builder& builder);
+		std::shared_ptr<Mesh> createMesh(Mesh::Builder& builder, Mesh::Type type = Mesh::Type::STATIC);
 		std::shared_ptr<Mesh> loadMesh(std::string filePath, std::string identifier);
 		std::shared_ptr<Mesh> getMesh(std::string identifier);
 

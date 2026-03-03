@@ -115,6 +115,20 @@ namespace crsp {
 
 	class Mesh {
 	public:
+		enum class Type {
+			/// <summary>
+			/// Loads mesh data into device local memory through a staging buffer.
+			/// Changing mesh data can be costly.
+			/// </summary>
+			STATIC,
+
+			/// <summary>
+			/// Keeps mesh data host-coherent.
+			/// More performant for real-time changing meshes.
+			/// </summary>
+			DYNAMIC
+		};
+
 		struct Builder {
 			uint32_t vertexSize;
 			std::vector<uint8_t> vertexBuffer{};
@@ -124,7 +138,7 @@ namespace crsp {
 			void copyToVertexBuffer(void* src, uint32_t vertexCount, uint32_t vertexSize);
 		};
 
-		Mesh(Device& device, const Mesh::Builder& builder);
+		Mesh(Device& device, const Mesh::Builder& builder, Type type = Type::STATIC);
 		~Mesh();
 
 		Mesh(const Mesh&) = delete;
@@ -167,5 +181,7 @@ namespace crsp {
 		uint32_t vertexCount = 0;
 		std::unique_ptr<Buffer> indexBuffer;
 		uint32_t indexCount = 0;
+
+		Type type;
 	};
 } // namespace

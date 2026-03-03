@@ -16,7 +16,7 @@ namespace crsp {
 			return pair->second;
 		}
 		else {
-			std::shared_ptr<FontAtlas> fontAtlas = std::make_shared<FontAtlas>(device, 16, 128, filePath);
+			std::shared_ptr<FontAtlas> fontAtlas = std::make_shared<FontAtlas>(device, 16, 128, filePath, Texture2D::Filter::NEAREST);
 			loadedFonts.insert({ identifier, fontAtlas });
 			return fontAtlas;
 		}
@@ -46,7 +46,7 @@ namespace crsp {
 		else
 			return nullptr;
 	}
-	std::shared_ptr<Mesh> ResourceManager::createMesh(Mesh::Builder& builder)
+	std::shared_ptr<Mesh> ResourceManager::createMesh(Mesh::Builder& builder, Mesh::Type type)
 	{
 		return std::make_shared<Mesh>(device, builder);
 	}

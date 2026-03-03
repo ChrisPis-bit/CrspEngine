@@ -103,15 +103,16 @@ namespace crsp {
 		// Text
 		Entity textTest = entityManager.createEntity();
 		Transform2D* transform2D = entityManager.addComponent<Transform2D>(textTest);
-		transform2D->width = 1.0f;
+		transform2D->width = 0.5f;
 		transform2D->height = 0.2f;
-		transform2D->position = glm::vec2(0.0f, -0.0f);
+		transform2D->position = glm::vec2(0.0f, -0.5f);
 
-		TextRender* textRender = entityManager.addComponent<TextRender>(textTest, 512, resourceManager->createMesh(Mesh::Builder()));
+		TextRender* textRender = entityManager.addComponent<TextRender>(textTest, 512, resourceManager->createMesh(Mesh::Builder(), Mesh::Type::DYNAMIC));
+		textRender->setAlignment(TextRender::Alignment::CENTER);
 		textRender->font = resourceManager->getFont("pixelated");
-		textRender->fontScale = 0.6f;
+		textRender->setFontScale(0.05f);
 		textRender->material = resourceManager->getMaterial("pixelated_font");
-		textRender->set("Hello! this is a test bruv. blaaaaa ffefwef wf wef wefwe f wef wef wefw ef wefw e");
+		textRender->set("Hello! this is a test bruv. I got many a words , heterogondorea Ima write here lolll, hello ahahha hello lolll hiii");
 	}
 
 	void SnakeScene::start()

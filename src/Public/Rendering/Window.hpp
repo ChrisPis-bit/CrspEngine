@@ -20,6 +20,8 @@ namespace crsp {
 		VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; }
 
 		float getAspect() { return (float)width / (float)height; }
+		float getHeight() { return (float)height; }
+		float getWidth() { return (float)width; }
 		bool wasResized() { return framebufferResized; }
 		void resetResizedFlag() { framebufferResized = false; }
 

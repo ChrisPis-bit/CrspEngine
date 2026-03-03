@@ -23,7 +23,7 @@ namespace std {
 }
 
 namespace crsp {
-	Mesh::Mesh(Device& device, const Mesh::Builder& builder) : device(device)
+	Mesh::Mesh(Device& device, const Mesh::Builder& builder, Type type) : device(device), type(type)
 	{
 		if (builder.vertexSize == 0)
 			return;
@@ -85,28 +85,28 @@ namespace crsp {
 		vertexCount = static_cast<uint32_t>(vertices.size() / (vertexSize / sizeof(uint8_t)));
 		assert(vertexCount >= 3 && "Vertex count must be atleast 3");
 
-		uint32_t bufferSize = vertexCount * vertexSize;
+		// Create vertex buffer
+		switch (type)
+		{
+		case crsp::Mesh::Type::DYNAMIC: // Write directly to host coherent buffer
+			vertexBuffer = std::make_unique<Buffer>(device,
+				vertexSize,
+				vertexCount,
+				VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+				VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+			);
+			break;
+		default: // Default, accounts for STATIC
+			vertexBuffer = std::make_unique<Buffer>(device,
+				vertexSize,
+				vertexCount,
+				VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+			);
+			break;
+		}
 
-		// Creates staging buffer
-		Buffer stagingBuffer{ device,
-			vertexSize,
-			vertexCount,
-			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-		};
-
-		stagingBuffer.map();
-		stagingBuffer.writeToBuffer((void*)vertices.data());
-
-		// Creaty and copy data over to vertex buffer
-		vertexBuffer = std::make_unique<Buffer>(device,
-			vertexSize,
-			vertexCount,
-			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-		);
-
-		device.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
+		writeVertexBuffer(vertices, vertexSize);	
 	}
 	void Mesh::createIndexBuffer(const std::vector<uint16_t>& indices)
 	{
@@ -119,20 +119,8 @@ namespace crsp {
 		assert(indexCount >= 3 && "Vertex count must be atleast 3");
 
 		uint32_t indexSize = sizeof(indices[0]);
-		uint32_t bufferSize = indexCount * indexSize;
 
-		// Creates staging buffer
-		Buffer stagingBuffer{ device,
-			indexSize,
-			indexCount,
-			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-		};
-
-		stagingBuffer.map();
-		stagingBuffer.writeToBuffer((void*)indices.data());
-
-		// Creaty and copy data over to vertex buffer
+		// Creat index buffer
 		indexBuffer = std::make_unique<Buffer>(device,
 			indexSize,
 			indexCount,
@@ -140,7 +128,7 @@ namespace crsp {
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 		);
 
-		device.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
+		writeIndexBuffer(indices);
 	}
 
 	void Mesh::writeVertexBuffer(const std::vector<uint8_t>& vertices, uint32_t vertexSize)
@@ -150,20 +138,30 @@ namespace crsp {
 
 		assert(vertexCount >= 3 && "Vertex count must be atleast 3");
 
-		uint32_t bufferSize = vertexCount * vertexSize;
+		switch (type)
+		{
+		case crsp::Mesh::Type::DYNAMIC:
+			vertexBuffer->map();
+			vertexBuffer->writeToBuffer((void*)vertices.data());
+			break;
+		default: // Default, accounts for STATIC
 
-		// Creates staging buffer
-		Buffer stagingBuffer{ device,
-			vertexSize,
-			vertexCount,
-			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-		};
+			uint32_t bufferSize = vertexCount * vertexSize;
 
-		stagingBuffer.map();
-		stagingBuffer.writeToBuffer((void*)vertices.data());
+			// Creates staging buffer
+			Buffer stagingBuffer{ device,
+				vertexSize,
+				vertexCount,
+				VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+			};
 
-		device.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
+			stagingBuffer.map();
+			stagingBuffer.writeToBuffer((void*)vertices.data());
+
+			device.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
+			break;
+		}	
 	}
 
 	void Mesh::writeIndexBuffer(const std::vector<uint16_t>& indices)
