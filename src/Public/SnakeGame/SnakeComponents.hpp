@@ -13,7 +13,7 @@ namespace crsp {
 		int width, height;
 
 		bool inGrid(glm::ivec2 pos) {
-			return pos.x < width && pos.x > 0 && pos.y < height && pos.x > 0;
+			return pos.x < width && pos.x >= 0 && pos.y < height && pos.x >= 0;
 		}
 	};
 

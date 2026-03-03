@@ -1,7 +1,6 @@
 #include "SnakeGame/SnakeScene.hpp"
 #include "SnakeGame/SnakeComponents.hpp"
 #include "SnakeGame/Systems/GridTransformSystem.hpp"
-#include "SnakeGame/Systems/SnakeControllerSystem.hpp"
 #include "Utils.hpp"
 
 #include <memory>
@@ -15,18 +14,14 @@ namespace crsp {
 	void SnakeScene::loadResources()
 	{
 		// Load resources
-		std::shared_ptr<Texture2D> vikingRoomTexture = resourceManager->loadTexture("textures/viking_room.png", "viking_room");
 		std::shared_ptr<Texture2D> snakeAtlasTexture = resourceManager->loadTexture("textures/snake_atlas.png", "snake_atlas", Texture2D::Filter::NEAREST);
-		resourceManager->loadMesh("models/viking_room.obj", "viking_room");
-		resourceManager->loadMesh("models/quad.obj", "quad");
-		resourceManager->loadMesh("models/cube.obj", "cube");
 		resourceManager->loadMesh("models/apple.obj", "apple");
 		resourceManager->loadMesh("models/snake_body.obj", "snake_body");
 		resourceManager->loadMesh("models/snake_head.obj", "snake_head");
 		std::shared_ptr<FontAtlas> font = resourceManager->loadFont("fonts/Minecraft.ttf", "pixelated");
 
 		// Create materials
-		std::shared_ptr<Material> snakeMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 1, 
+		std::shared_ptr<Material> snakeMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 1,
 			Material::RenderDomain::Surface3D,
 			"shaders/simple_shader.vert.spv",
 			"shaders/simple_shader.frag.spv",
@@ -47,7 +42,7 @@ namespace crsp {
 		environmentMaterial->writeUniform(&stoneMat);
 		environmentMaterial->build();
 
-		std::shared_ptr<Material> textMaterial = resourceManager->createMaterial(0, 0, 
+		std::shared_ptr<Material> textMaterial = resourceManager->createMaterial(0, 0,
 			Material::RenderDomain::UI,
 			"shaders/text.vert.spv",
 			"shaders/text.frag.spv",
@@ -69,7 +64,7 @@ namespace crsp {
 		meshRenderSystem = entityManager.registerSystem<MeshRenderSystem>();
 		textRenderSystem = entityManager.registerSystem<TextRenderSystem>(getWindow());
 
-		entityManager.registerSystem<SnakeControllerSystem>(grid, getInputSystem(), getResourceManager());
+		snakeControllerSystem = entityManager.registerSystem<SnakeControllerSystem>(grid, getInputSystem(), getResourceManager());
 		entityManager.registerSystem<GridTransformSystem>(grid);
 	}
 
@@ -150,7 +145,19 @@ namespace crsp {
 
 	void SnakeScene::gameOver()
 	{
-		reset();
+		TextRender* textRender = entityManager.getComponent<TextRender>(scoreTextEntity);
+		SnakeHead* snakeHead = entityManager.getComponent<SnakeHead>(snakeEntity);
+
+		// If the snake fills the whole grid, you win!
+		if (snakeHead->segments.size() < grid.width * grid.height - 1)
+			textRender->set("Game Over!\nFinal Score: " + std::to_string(snakeHead->segments.size()) + "\nPress R to restart");
+		else
+			textRender->set("You Win!\nFinal Score: " + std::to_string(snakeHead->segments.size()) + "\nPress R to restart");
+
+		// De-activate controller
+		snakeControllerSystem->setActive(false);
+
+		gameEnded = true;
 	}
 
 	void SnakeScene::reset()
@@ -165,7 +172,7 @@ namespace crsp {
 		entityManager.getComponent<GridTransform>(appleEntity)->gridPosition = glm::ivec2(grid.width / 2, grid.height / 2);
 
 		// Destroy segments
-		for (auto& segment: snakeHead->segments)
+		for (auto& segment : snakeHead->segments)
 		{
 			entityManager.destroyEntity(segment);
 		}
@@ -173,13 +180,20 @@ namespace crsp {
 
 		// Reset text
 		entityManager.getComponent<TextRender>(scoreTextEntity)->set(SnakeHead::SCORE_TEXT + std::to_string(0));
+
+		// Re-activate controller
+		snakeControllerSystem->setActive(true);
+
+		gameEnded = false;
 	}
 
 	void SnakeScene::update(float deltaTime, float totalTime)
 	{
+		SnakeHead* snakeHead = entityManager.getComponent<SnakeHead>(snakeEntity);
 		// Game over when the snake hits a wall or itself
-		if (entityManager.getComponent<SnakeHead>(snakeEntity)->hit)
-			gameOver();
+		if (snakeHead->hit && !gameEnded) gameOver();
+
+		if (gameEnded && getInputSystem().isKeyDown(GLFW_KEY_R)) reset();
 	}
 
 	void SnakeScene::render()

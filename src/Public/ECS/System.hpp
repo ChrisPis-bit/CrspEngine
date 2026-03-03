@@ -19,11 +19,15 @@ namespace crsp {
 		inline ComponentMask getMask() { return componentMask; }
 		inline bool iterateAll() { return all; }
 
+		bool isActive() { return active; }
+		void setActive(bool b) { active = b; }
+
 	protected:
 		std::set<Entity> entities;
 		ComponentMask componentMask;
 		EntityManager& entityManager;
 		bool all{ false };
+		bool active{ true };
 	};
 
 	template<typename... ComponentTypes>

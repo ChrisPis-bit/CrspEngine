@@ -68,14 +68,18 @@ namespace crsp {
 				// Collision with apple
 				GridTransform* appleTransform = entityManager.getComponent<GridTransform>(snakeHead->apple);
 				if (gridTransform->gridPosition == appleTransform->gridPosition) {
-					// Update apple position
-					appleTransform->gridPosition = getFreePosition(snakeHead->segments, gridTransform->gridPosition);
-
 					// Add new segment
 					snakeHead->segments.push_back(createSnakeSegment(lastSegmentPos));
 
+					// Update apple position
+					appleTransform->gridPosition = getFreePosition(snakeHead->segments, gridTransform->gridPosition);
+
 					// Update score
 					entityManager.getComponent<TextRender>(snakeHead->scoreText)->set(SnakeHead::SCORE_TEXT + std::to_string(snakeHead->segments.size()));
+
+					// All tiles are filled, game completed!
+					if (snakeHead->segments.size() == grid.width * grid.height - 1)
+						snakeHead->hit = true;
 				}
 
 				// Check collision with grid edges
@@ -135,6 +139,8 @@ namespace crsp {
 			int y = i / grid.width;
 			possiblePositions.push_back(glm::ivec2(x, y));
 		}
+
+		if (possiblePositions.size() == 0) return glm::ivec2(0);
 
 		// Return random possible position
 		return possiblePositions[randomRange(0, possiblePositions.size())];

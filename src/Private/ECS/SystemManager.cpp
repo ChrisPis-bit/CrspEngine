@@ -27,7 +27,7 @@ namespace crsp {
 		for (auto& pair : systems)
 		{
 			auto& system = pair.second;
-			system->update(deltaTime, currentTime);
+			if (system->isActive()) system->update(deltaTime, currentTime);
 		}
 	}
 	void SystemManager::lateUpdateSystems(float deltaTime, float currentTime)
@@ -35,7 +35,7 @@ namespace crsp {
 		for (auto& pair : systems)
 		{
 			auto& system = pair.second;
-			system->lateUpdate(deltaTime, currentTime);
+			if (system->isActive()) system->lateUpdate(deltaTime, currentTime);
 		}
 	}
 }

@@ -308,6 +308,8 @@ namespace crsp {
 
 	void ShadowRenderer::cleanupDepthResources()
 	{
+		vkDestroySampler(device.getDevice(), depthSampler, nullptr);
+
 		vkDestroyImageView(device.getDevice(), depthImageView, nullptr);
 		vkDestroyImage(device.getDevice(), depthImage, nullptr);
 		vkFreeMemory(device.getDevice(), depthImageMemory, nullptr);

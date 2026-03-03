@@ -2,9 +2,12 @@
 #include "SceneLogic/Scene.hpp"
 #include "ECS/Systems/MeshRenderSystem.hpp"
 #include "ECS/Systems/TextRenderSystem.hpp"
+#include "SnakeGame/Systems/SnakeControllerSystem.hpp"
 #include "SnakeComponents.hpp"
 
 namespace crsp {
+	class SnakeControllerSystem;
+
 	/// <summary>
 	/// Example scene showcasing a basic implementation of the game Snake.
 	/// </summary>
@@ -26,11 +29,14 @@ namespace crsp {
 
 		std::shared_ptr<MeshRenderSystem> meshRenderSystem;
 		std::shared_ptr<TextRenderSystem> textRenderSystem;
+		std::shared_ptr<SnakeControllerSystem> snakeControllerSystem;
 
-		Grid grid{ 13, 13 };
+		Grid grid{ 9, 9 };
 
 		Entity snakeEntity;
 		Entity appleEntity;
 		Entity scoreTextEntity;
+
+		bool gameEnded;
 	};
 }
