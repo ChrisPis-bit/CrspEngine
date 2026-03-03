@@ -17,17 +17,8 @@ namespace crsp {
 			throw std::runtime_error("Failed to load font");
 		}
 
-		FT_Set_Pixel_Sizes(face, 0, fontSize); // 0 = width auto, height = fontSize
-		//const char endChar = 126;   // ~
+		FT_Set_Pixel_Sizes(face, 0, fontSize);
 
-		//// First pass: measure atlas size
-		//int atlasWidth = 0;
-		//int atlasHeight = 0;
-		//for (char c = startChar; c <= endChar; ++c) {
-		//	if (FT_Load_Char(face, c, FT_LOAD_RENDER)) continue;
-		//	atlasWidth += face->glyph->bitmap.width + 1;
-		//	atlasHeight = std::max(atlasHeight, (int)face->glyph->bitmap.rows);
-		//}
 		yAdvance = face->size->metrics.height / 64;
 
 		std::vector<char> bitmap;

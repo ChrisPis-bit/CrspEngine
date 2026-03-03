@@ -26,6 +26,7 @@ namespace crsp {
 		void entityDestroyed(Entity entity);
 		void entityComponentMaskChanged(Entity entity, ComponentMask mask);
 		void updateSystems(float deltaTime, float currentTime);
+		void lateUpdateSystems(float deltaTime, float currentTime);
 
 	private:
 		std::unordered_map<std::type_index, std::shared_ptr<System>> systems{};

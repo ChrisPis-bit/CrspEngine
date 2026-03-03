@@ -64,7 +64,7 @@ namespace crsp {
 		// Directional light
 		DirectionalLight mainLight{};
 		glm::vec3 lightDir = glm::normalize(glm::vec3(1.5, -3, -1));
-		mainLight.setOrthographicProjection(-3.0f, 3.0f, -3.0f, 3.0f, 1.0f, 7.5f);
+		mainLight.setOrthographicProjection(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 15.0f);
 
 		// prepare start time
 		auto lastTime = std::chrono::high_resolution_clock::now();
@@ -97,7 +97,7 @@ namespace crsp {
 			if (glfwGetKey(window.getGLFWwindow(), GLFW_KEY_F))
 				lightAngle += 0.5f * deltaTime;
 			glm::vec3 lightDir = glm::normalize(glm::vec3(glm::cos(lightAngle), -3, glm::sin(lightAngle)));
-			mainLight.setViewDirection(lightDir * 5.0f, lightDir, glm::vec3(0, 1, 0));
+			mainLight.setViewDirection(lightDir * 10.0f, lightDir, glm::vec3(0, 1, 0));
 
 			if (VkCommandBuffer commandBuffer = renderer.beginFrame()) {
 				// prepare frame info
@@ -113,7 +113,7 @@ namespace crsp {
 				};
 
 				// Gather render data from game objects.
-				RenderData renderData = currentScene->getRenderData();
+				RenderData& renderData = currentScene->getRenderData();
 
 				// update UBO
 				GlobalUBO ubo{};

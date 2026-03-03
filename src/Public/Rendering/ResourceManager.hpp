@@ -23,7 +23,7 @@ namespace crsp {
 		std::shared_ptr<FontAtlas> loadFont(std::string filePath, std::string identifier);
 		std::shared_ptr<FontAtlas> getFont(std::string identifier);
 
-		std::shared_ptr<Texture2D> loadTexture(std::string filePath, std::string identifier);
+		std::shared_ptr<Texture2D> loadTexture(std::string filePath, std::string identifier, Texture2D::Filter filter = Texture2D::Filter::LINEAR);
 		std::shared_ptr<Texture2D> getTexture(std::string identifier);
 
 		std::shared_ptr<Mesh> createMesh(Mesh::Builder& builder, Mesh::Type type = Mesh::Type::STATIC);

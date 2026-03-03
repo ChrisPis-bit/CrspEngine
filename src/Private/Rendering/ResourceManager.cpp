@@ -28,13 +28,13 @@ namespace crsp {
 		else
 			return nullptr;
 	}
-	std::shared_ptr<Texture2D> ResourceManager::loadTexture(std::string filePath, std::string identifier)
+	std::shared_ptr<Texture2D> ResourceManager::loadTexture(std::string filePath, std::string identifier, Texture2D::Filter filter)
 	{
 		if (auto pair = loadedTextures.find(identifier); pair != loadedTextures.end()) {
 			return pair->second;
 		}
 		else {
-			std::shared_ptr<Texture2D> texture = Texture2D::createTextureFromFile(device, filePath);
+			std::shared_ptr<Texture2D> texture = Texture2D::createTextureFromFile(device, filePath, filter);
 			loadedTextures.insert({ identifier, texture });
 			return texture;
 		}

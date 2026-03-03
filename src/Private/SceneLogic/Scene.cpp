@@ -8,7 +8,8 @@ namespace crsp {
 		renderData.UIrenderObjects.clear();
 
 		entityManager.updateSystems(deltaTime, totalTime);
-
 		update(deltaTime, totalTime);
+		entityManager.lateUpdateSystems(deltaTime, totalTime);
+		render();
 	}
 }

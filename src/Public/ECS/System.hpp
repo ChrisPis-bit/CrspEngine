@@ -11,6 +11,7 @@ namespace crsp {
 		virtual ~System() = default;
 
 		virtual void update(float deltaTime, float currentTime) {}
+		virtual void lateUpdate(float deltaTime, float currentTime) {}
 
 		void registerEntity(Entity entity) { entities.insert(entity); }
 		void removeEntity(Entity entity) { entities.erase(entity); }

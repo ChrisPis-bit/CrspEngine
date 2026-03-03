@@ -4,7 +4,7 @@
 #include <array>
 
 namespace crsp {
-	void TextRenderSystem::update(float deltaTime, float currentTime)
+	void TextRenderSystem::lateUpdate(float deltaTime, float currentTime)
 	{
 		renderObjects.clear();
 		//const float baseAspect = 1.0f / 1.0f;
@@ -18,7 +18,7 @@ namespace crsp {
 			TextRender* textRender = entityManager.getComponent<TextRender>(entity);
 			float aspect = transform->getAspect();
 
-			if ((textRender->textUpdated || window.wasResized()) && textRender->text.size() > 0) {
+			if (textRender->textUpdated && textRender->text.size() > 0) {
 				// Calculate aspect changes.
 				const float fontSize = (float)textRender->font->getFontSize() / textRender->fontScale;
 

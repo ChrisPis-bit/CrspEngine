@@ -40,13 +40,14 @@ namespace crsp {
 		virtual void spawnEntities() = 0;
 		virtual void start() {}
 		virtual void update(float deltaTime, float totalTime) {};
+		virtual void render() {};
 
 		virtual void updateCameraAspect(float aspectRatio) {
 			camera.setPerspectiveProjection(glm::radians(50.0f), aspectRatio, .1f, 100.0f);
 		}
 
 		Camera& getCamera() { return camera; }
-		RenderData getRenderData() { return renderData; }
+		RenderData& getRenderData() { return renderData; }
 		ResourceManager& getResourceManager() { return *resourceManager; }
 		Window& getWindow() { return *window; }
 		InputSystem& getInputSystem() { return *inputSystem; }

@@ -30,4 +30,12 @@ namespace crsp {
 			system->update(deltaTime, currentTime);
 		}
 	}
+	void SystemManager::lateUpdateSystems(float deltaTime, float currentTime)
+	{
+		for (auto& pair : systems)
+		{
+			auto& system = pair.second;
+			system->lateUpdate(deltaTime, currentTime);
+		}
+	}
 }

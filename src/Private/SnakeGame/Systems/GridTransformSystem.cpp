@@ -9,7 +9,9 @@ namespace crsp {
 			GridTransform* gridTransform = entityManager.getComponent<GridTransform>(entity);
 
 			// Transforms grid positions to 3D transform.
-			transform->position = glm::vec3(gridTransform->gridPosition.x - grid.width / 2.0f, 0, -gridTransform->gridPosition.y + grid.height / 2.0f);
+			glm::vec3 dir = glm::vec3(gridTransform->gridPosition.x - grid.width / 2.0f + .5f, 0, -gridTransform->gridPosition.y + grid.height / 2.0f + .5f) - transform->position;
+			transform->position += dir / 2.0f * deltaTime * LERP_SPEED;
+			//transform->position = glm::vec3(gridTransform->gridPosition.x - grid.width / 2.0f + .5f, 0, -gridTransform->gridPosition.y + grid.height / 2.0f + .5f);
 		}
 	}
 }

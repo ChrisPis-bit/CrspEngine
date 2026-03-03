@@ -17,6 +17,7 @@ namespace crsp {
 		void spawnEntities() override;
 		void start() override;
 		void update(float deltaTime, float totalTime) override;
+		void render();
 		void updateCameraAspect(float aspectRatio) override;
 	private:
 
@@ -26,7 +27,7 @@ namespace crsp {
 		std::shared_ptr<MeshRenderSystem> meshRenderSystem;
 		std::shared_ptr<TextRenderSystem> textRenderSystem;
 
-		Grid grid{ 12, 12 };
+		Grid grid{ 13, 13 };
 
 		Entity snakeEntity;
 		Entity appleEntity;

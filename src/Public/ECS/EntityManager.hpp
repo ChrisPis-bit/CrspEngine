@@ -68,6 +68,7 @@ namespace crsp {
 		std::shared_ptr<T> registerSystem(Args&&... args) { return systemManager.registerSystem<T>(*this, std::forward<Args>(args)...); }
 
 		void updateSystems(float deltaTime, float currentTime) { systemManager.updateSystems(deltaTime, currentTime); }
+		void lateUpdateSystems(float deltaTime, float currentTime) { systemManager.lateUpdateSystems(deltaTime, currentTime); }
 
 	private:
 		inline Entity createEntityId(EntityIndex index, EntityVersion version);

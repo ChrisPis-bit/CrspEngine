@@ -9,7 +9,7 @@ namespace crsp {
 		TextRenderSystem(EntityManager& entityManager, Window& window) : BaseSystem(entityManager), window(window) {}
 		~TextRenderSystem() = default;
 
-		void update(float deltaTime, float currentTime) override;
+		void lateUpdate(float deltaTime, float currentTime) override;
 
 		std::vector<UIRenderObject> renderObjects{};
 		Window& window;

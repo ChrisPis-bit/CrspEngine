@@ -1,7 +1,7 @@
 #include "ECS/Systems/MeshRenderSystem.hpp"
 
 namespace crsp {
-	void MeshRenderSystem::update(float deltaTime, float currentTime)
+	void MeshRenderSystem::lateUpdate(float deltaTime, float currentTime)
 	{
 		renderObjects.clear();
 		for (auto const& entity : entities)

@@ -9,7 +9,7 @@ namespace crsp {
 		MeshRenderSystem(EntityManager& entityManager) : BaseSystem(entityManager) {}
 		~MeshRenderSystem() = default;
 
-		void update(float deltaTime, float currentTime) override;
+		void lateUpdate(float deltaTime, float currentTime) override;
 
 		std::vector<RenderObject> renderObjects{};
 	};

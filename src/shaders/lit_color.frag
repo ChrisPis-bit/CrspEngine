@@ -27,7 +27,7 @@ layout( push_constant ) uniform constants
 	mat4 modelMatrix;
 } pushConstants;
 
-const float AMBIENT = 0.02;
+const float AMBIENT = 0.1;
 
 float shadowCalculation(vec4 lightSpaceCoord, vec3 lightDir, vec3 normal){
     vec3 projCoords = lightSpaceCoord.xyz / lightSpaceCoord.w;

@@ -28,6 +28,15 @@ namespace crsp {
 		/// <returns>Created entity</returns>
 		Entity createSnakeSegment(glm::ivec2 position);
 
+		/// <summary>
+		/// Gets a free grid position in the grid.
+		/// Checks which cells are occupied by the snake.
+		/// </summary>
+		/// <param name="segments">Snake segments</param>
+		/// <param name="head">Snake head position</param>
+		/// <returns>Free grid position</returns>
+		glm::ivec2 getFreePosition(std::vector<Entity> segments, glm::ivec2 head);
+
 	private:
 		std::queue<glm::ivec2> inputQueue{};
 		float moveTimer = 0;

@@ -16,42 +16,36 @@ namespace crsp {
 	{
 		// Load resources
 		std::shared_ptr<Texture2D> vikingRoomTexture = resourceManager->loadTexture("textures/viking_room.png", "viking_room");
+		std::shared_ptr<Texture2D> snakeAtlasTexture = resourceManager->loadTexture("textures/snake_atlas.png", "snake_atlas", Texture2D::Filter::NEAREST);
 		resourceManager->loadMesh("models/viking_room.obj", "viking_room");
 		resourceManager->loadMesh("models/quad.obj", "quad");
 		resourceManager->loadMesh("models/cube.obj", "cube");
+		resourceManager->loadMesh("models/apple.obj", "apple");
+		resourceManager->loadMesh("models/snake_body.obj", "snake_body");
+		resourceManager->loadMesh("models/snake_head.obj", "snake_head");
 		std::shared_ptr<FontAtlas> font = resourceManager->loadFont("fonts/Minecraft.ttf", "pixelated");
 
 		// Create materials
-		std::shared_ptr<Material> standardMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 1, 
+		std::shared_ptr<Material> snakeMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 1, 
 			Material::RenderDomain::Surface3D,
 			"shaders/simple_shader.vert.spv",
 			"shaders/simple_shader.frag.spv",
-			"standard");
-		standardMaterial->writeImage(0, &vikingRoomTexture->descriptorInfo());
+			"snake_material");
+		snakeMaterial->writeImage(0, &snakeAtlasTexture->descriptorInfo());
 		BaseMaterial baseMat{};
-		baseMat.color = glm::vec4(1.0, .5, .1, 1.0);
-		standardMaterial->writeUniform(&baseMat);
-		standardMaterial->build();
-
-		std::shared_ptr<Material> snakeMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 0, 
-			Material::RenderDomain::Surface3D,
-			"shaders/lit_color.vert.spv",
-			"shaders/lit_color.frag.spv",
-			"snake");
-		BaseMaterial snakeMat{};
-		snakeMat.color = glm::vec4(0.2, 1.0, .1, 1.0);
-		snakeMaterial->writeUniform(&snakeMat);
+		baseMat.color = glm::vec4(1.0, 1.0, 1.0, 1.0);
+		snakeMaterial->writeUniform(&baseMat);
 		snakeMaterial->build();
 
-		std::shared_ptr<Material> appleMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 0, 
+		std::shared_ptr<Material> environmentMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 0,
 			Material::RenderDomain::Surface3D,
 			"shaders/lit_color.vert.spv",
 			"shaders/lit_color.frag.spv",
-			"apple");
-		BaseMaterial appleMat{};
-		appleMat.color = glm::vec4(1.0, 0.0, 0.0, 1.0);
-		appleMaterial->writeUniform(&appleMat);
-		appleMaterial->build();
+			"stone_material");
+		BaseMaterial stoneMat{};
+		stoneMat.color = glm::vec4(0.5, 0.5, 0.5, 1.0);
+		environmentMaterial->writeUniform(&stoneMat);
+		environmentMaterial->build();
 
 		std::shared_ptr<Material> textMaterial = resourceManager->createMaterial(0, 0, 
 			Material::RenderDomain::UI,
@@ -86,8 +80,8 @@ namespace crsp {
 		Transform* transform = entityManager.addComponent<Transform>(appleEntity);
 		transform->scale = glm::vec3(.5f);
 		MeshRender* meshRender = entityManager.addComponent<MeshRender>(appleEntity);
-		meshRender->material = resourceManager->getMaterial("apple");
-		meshRender->mesh = resourceManager->getMesh("cube");
+		meshRender->material = resourceManager->getMaterial("snake_material");
+		meshRender->mesh = resourceManager->getMesh("apple");
 		entityManager.addComponent<GridTransform>(appleEntity);
 
 		// Text
@@ -107,12 +101,25 @@ namespace crsp {
 		transform = entityManager.addComponent<Transform>(snakeEntity);
 		transform->scale = glm::vec3(.5f);
 		meshRender = entityManager.addComponent<MeshRender>(snakeEntity);
-		meshRender->material = resourceManager->getMaterial("snake");
-		meshRender->mesh = resourceManager->getMesh("cube");
+		meshRender->material = resourceManager->getMaterial("snake_material");
+		meshRender->mesh = resourceManager->getMesh("snake_head");
 		entityManager.addComponent<GridTransform>(snakeEntity);
 		entityManager.addComponent<SnakeHead>(snakeEntity, appleEntity, scoreTextEntity);
 
-		
+		// Environment
+		for (int x = 0; x < grid.width; x++)
+		{
+			for (int y = 0; y < grid.height; y++)
+			{
+				Entity groundTile = entityManager.createEntity();
+				transform = entityManager.addComponent<Transform>(groundTile);
+				transform->scale = glm::vec3(.5f);
+				transform->position = glm::vec3(x - grid.width / 2.0f + .5f, 1, -y + grid.height / 2.0f + .5f);
+				meshRender = entityManager.addComponent<MeshRender>(groundTile);
+				meshRender->material = resourceManager->getMaterial("stone_material");
+				meshRender->mesh = resourceManager->getMesh("snake_body");
+			}
+		}
 	}
 
 	void SnakeScene::start()
@@ -173,7 +180,10 @@ namespace crsp {
 		// Game over when the snake hits a wall or itself
 		if (entityManager.getComponent<SnakeHead>(snakeEntity)->hit)
 			gameOver();
+	}
 
+	void SnakeScene::render()
+	{
 		renderSurfaces(meshRenderSystem->renderObjects);
 		renderUI(textRenderSystem->renderObjects);
 	}
