@@ -110,11 +110,17 @@ namespace crsp {
 
 		// TODO: better separate surface and UI render pipelines.
 		if (renderDomain == RenderDomain::UI) {
-			pipelineConfig.rasterizationInfo.cullMode = VK_CULL_MODE_NONE;
+			pipelineConfig.rasterizationInfo.cullMode = VK_CULL_MODE_BACK_BIT;
 			pipelineConfig.depthStencilInfo.depthTestEnable = VK_FALSE;
 			pipelineConfig.depthStencilInfo.depthWriteEnable = VK_FALSE;
 			pipelineConfig.vertexInputAttributeDescriptions = Vertex2D::getAttributeDescriptions();
 			pipelineConfig.vertexInputBindingDescription = Vertex2D::getBindingDescriptions();
+
+			// Transparency
+			pipelineConfig.colorBlendAttachment.blendEnable = VK_TRUE;
+			pipelineConfig.colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+			pipelineConfig.colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+			pipelineConfig.colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
 		}
 
 		pipeline = std::make_unique<Pipeline>(device,

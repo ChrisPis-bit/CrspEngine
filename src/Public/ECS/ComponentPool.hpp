@@ -1,19 +1,24 @@
 #pragma once
 #include "Entity.hpp"
 namespace crsp {
-	struct ComponentPool {
-		ComponentPool(size_t componentSize) : componentSize{ componentSize } {
-			data = new char[componentSize * MAX_ENTITIES];
+	struct IComponentPool {
+		IComponentPool() {}
+		virtual ~IComponentPool() {}
+	};
+
+	template<typename T>
+	struct ComponentPool : public IComponentPool {
+		ComponentPool() {
+			data = new T[MAX_ENTITIES];
 		}
 		~ComponentPool() {
 			delete[] data;
 		}
 
-		inline void* get(size_t index) {
-			return data + index * componentSize;
+		inline T* get(size_t index) {
+			return data + index;
 		}
 
-		char* data{};
-		size_t componentSize;
+		T* data{};
 	};
 }

@@ -25,18 +25,20 @@ namespace std {
 namespace crsp {
 	Mesh::Mesh(Device& device, const Mesh::Builder& builder) : device(device)
 	{
+		if (builder.vertexSize == 0)
+			return;
+
 		createVertexBuffer(builder.vertexBuffer, builder.vertexSize);
 		createIndexBuffer(builder.indices);
 	}
 
 	Mesh::~Mesh()
 	{
-		
 	}
 
 	void Mesh::bind(VkCommandBuffer commandBuffer)
 	{
-		VkBuffer vertexBuffers[] = { vertexBuffer->getBuffer()};
+		VkBuffer vertexBuffers[] = { vertexBuffer->getBuffer() };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
@@ -55,6 +57,22 @@ namespace crsp {
 		}
 	}
 
+	void Mesh::writeVertices(const std::vector<uint8_t>& vertices, uint32_t vertexSize)
+	{
+		if (vertexCount != (vertices.size() / (vertexSize / sizeof(uint8_t))))
+			createVertexBuffer(vertices, vertexSize);
+		else
+			writeVertexBuffer(vertices, vertexSize);
+	}
+
+	void Mesh::writeIndices(const std::vector<uint16_t>& indices)
+	{
+		if (indexCount != indices.size())
+			createIndexBuffer(indices);
+		else
+			writeIndexBuffer(indices);
+	}
+
 	std::unique_ptr<Mesh> Mesh::createMeshFromFile(Device& device, const std::string& filepath)
 	{
 		Builder builder{};
@@ -70,7 +88,7 @@ namespace crsp {
 		uint32_t bufferSize = vertexCount * vertexSize;
 
 		// Creates staging buffer
-		Buffer stagingBuffer{ device, 
+		Buffer stagingBuffer{ device,
 			vertexSize,
 			vertexCount,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -81,12 +99,12 @@ namespace crsp {
 		stagingBuffer.writeToBuffer((void*)vertices.data());
 
 		// Creaty and copy data over to vertex buffer
-		vertexBuffer = std::make_unique<Buffer>(device, 
+		vertexBuffer = std::make_unique<Buffer>(device,
 			vertexSize,
 			vertexCount,
 			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-			);
+		);
 
 		device.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
 	}
@@ -125,6 +143,54 @@ namespace crsp {
 		device.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
 	}
 
+	void Mesh::writeVertexBuffer(const std::vector<uint8_t>& vertices, uint32_t vertexSize)
+	{
+		if (vertexCount != (vertices.size() / (vertexSize / sizeof(uint8_t))))
+			return;
+
+		assert(vertexCount >= 3 && "Vertex count must be atleast 3");
+
+		uint32_t bufferSize = vertexCount * vertexSize;
+
+		// Creates staging buffer
+		Buffer stagingBuffer{ device,
+			vertexSize,
+			vertexCount,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
+
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer((void*)vertices.data());
+
+		device.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
+	}
+
+	void Mesh::writeIndexBuffer(const std::vector<uint16_t>& indices)
+	{
+		// Only write when the index count is equal to the given indices
+		if (indices.size() != indexCount)
+			return;
+
+		assert(indexCount >= 3 && "Vertex count must be atleast 3");
+
+		uint32_t indexSize = sizeof(indices[0]);
+		uint32_t bufferSize = indexCount * indexSize;
+
+		// Creates staging buffer
+		Buffer stagingBuffer{ device,
+			indexSize,
+			indexCount,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
+
+		stagingBuffer.map();
+		stagingBuffer.writeToBuffer((void*)indices.data());
+
+		device.copyBuffer(stagingBuffer.getBuffer(), indexBuffer->getBuffer(), bufferSize);
+	}
+
 	void Mesh::Builder::loadModel(const std::string& filepath)
 	{
 		tinyobj::attrib_t attrib;
@@ -135,7 +201,7 @@ namespace crsp {
 		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, filepath.c_str())) {
 			throw std::runtime_error(warn + err);
 		}
-		
+
 		std::vector<Vertex> vertices;
 		indices.clear();
 

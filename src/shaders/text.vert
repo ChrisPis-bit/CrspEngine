@@ -18,14 +18,16 @@ layout(set = 0, binding = 0) uniform globalUBO {
 //push constants block
 layout( push_constant ) uniform constants
 {
-	mat4 modelMatrix;
+	vec2 position;
+    vec2 scale;
+    float rotation;
 } push;
 
 void main() {
-    vec4 pos = push.modelMatrix * vec4(inPosition, 0.0, 1.0);
+    vec2 pos = inPosition * push.scale + push.position;
 
     fragColor = inColor;     
     fragTexCoord = inTexCoord;
 
-    gl_Position = pos;
+    gl_Position = vec4(pos, 1.0, 1.0);
 }

@@ -27,10 +27,15 @@ namespace crsp {
 			size_t componentPoolsAmount = componentPools.size();
 
 			if (componentPoolsAmount <= componentId) {
-				componentPools.resize(componentPoolsAmount + 1);
-				componentPools[componentId] = std::make_unique<ComponentPool>(sizeof(T));
+				componentPools.resize(componentId + 1);
+				componentPools[componentId] = std::make_unique<ComponentPool<T>>();
 			}
-			T* newComponent = new (componentPools[componentId]->get(entity.getIndex())) T(std::forward<Args>(args)...);
+			else if (!componentPools[componentId]) {
+				componentPools[componentId] = std::make_unique<ComponentPool<T>>();
+			}
+
+			ComponentPool<T>* componentPool = static_cast<ComponentPool<T>*>(componentPools[componentId].get());
+			T* newComponent = new (componentPool->get(entity.getIndex())) T(std::forward<Args>(args)...);
 
 			entities[entity.getIndex()].mask.set(componentId);
 			systemManager.entityComponentMaskChanged(entity, entities[entity.getIndex()].mask);
@@ -44,7 +49,8 @@ namespace crsp {
 			if (!entities[entity.getIndex()].mask.test(componentId))
 				return nullptr;
 
-			return static_cast<T*>(componentPools[componentId]->get(entity.getIndex()));
+			ComponentPool<T>* componentPool = static_cast<ComponentPool<T>*>(componentPools[componentId].get());
+			return componentPool->get(entity.getIndex());
 		}
 
 		template<typename T>
@@ -69,7 +75,7 @@ namespace crsp {
 		SystemManager systemManager{};
 
 		std::vector<EntityDesc> entities;
-		std::vector<std::unique_ptr<ComponentPool>> componentPools;
+		std::vector<std::unique_ptr<IComponentPool>> componentPools;
 		std::vector<EntityIndex> freeEntities;
 	};
 }

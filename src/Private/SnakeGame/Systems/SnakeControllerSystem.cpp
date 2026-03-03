@@ -89,8 +89,8 @@ namespace crsp {
 		Entity newSegment = entityManager.createEntity();
 		entityManager.addComponent<Transform>(newSegment)->scale = glm::vec3(.5f);
 		MeshRender* meshRender = entityManager.addComponent<MeshRender>(newSegment);
-		meshRender->material = resourceManager.getMaterial("snake").get();
-		meshRender->mesh = resourceManager.getMesh("cube").get();
+		meshRender->material = resourceManager.getMaterial("snake");
+		meshRender->mesh = resourceManager.getMesh("cube");
 		entityManager.addComponent<GridTransform>(newSegment)->gridPosition = position;
 
 		return newSegment;

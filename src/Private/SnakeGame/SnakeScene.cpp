@@ -1,6 +1,5 @@
 #include "SnakeGame/SnakeScene.hpp"
 #include "SnakeGame/SnakeComponents.hpp"
-#include "ECS/Systems/MeshRenderSystem.hpp"
 #include "SnakeGame/Systems/GridTransformSystem.hpp"
 #include "SnakeGame/Systems/SnakeControllerSystem.hpp"
 #include "Utils.hpp"
@@ -20,6 +19,7 @@ namespace crsp {
 		resourceManager->loadMesh("models/viking_room.obj", "viking_room");
 		resourceManager->loadMesh("models/quad.obj", "quad");
 		resourceManager->loadMesh("models/cube.obj", "cube");
+		std::shared_ptr<FontAtlas> font = resourceManager->loadFont("fonts/Minecraft.ttf", "pixelated");
 
 		// Create materials
 		std::shared_ptr<Material> standardMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 1, 
@@ -27,7 +27,7 @@ namespace crsp {
 			"shaders/simple_shader.vert.spv",
 			"shaders/simple_shader.frag.spv",
 			"standard");
-		standardMaterial->writeImage(0, &resourceManager->atlasTexture->descriptorInfo());
+		standardMaterial->writeImage(0, &vikingRoomTexture->descriptorInfo());
 		BaseMaterial baseMat{};
 		baseMat.color = glm::vec4(1.0, .5, .1, 1.0);
 		standardMaterial->writeUniform(&baseMat);
@@ -59,13 +59,23 @@ namespace crsp {
 			"shaders/text.frag.spv",
 			"text");
 		textMaterial->build();
+
+		std::shared_ptr<Material> fontMaterial = resourceManager->createMaterial(0, 1,
+			Material::RenderDomain::UI,
+			"shaders/text.vert.spv",
+			"shaders/text.frag.spv",
+			"pixelated_font");
+		fontMaterial->writeImage(0, &font->descriptorInfo());
+		fontMaterial->build();
 	}
 
 	void SnakeScene::registerSystems()
 	{
 		// register systems
 		meshRenderSystem = entityManager.registerSystem<MeshRenderSystem>();
-		entityManager.registerSystem<SnakeControllerSystem>(grid, *inputSystem, *resourceManager);
+		textRenderSystem = entityManager.registerSystem<TextRenderSystem>(getWindow());
+
+		entityManager.registerSystem<SnakeControllerSystem>(grid, getInputSystem(), getResourceManager());
 		entityManager.registerSystem<GridTransformSystem>(grid);
 	}
 
@@ -76,8 +86,8 @@ namespace crsp {
 		Transform* transform = entityManager.addComponent<Transform>(appleEntity);
 		transform->scale = glm::vec3(.5f);
 		MeshRender* meshRender = entityManager.addComponent<MeshRender>(appleEntity);
-		meshRender->material = resourceManager->getMaterial("apple").get();
-		meshRender->mesh = resourceManager->getMesh("cube").get();
+		meshRender->material = resourceManager->getMaterial("apple");
+		meshRender->mesh = resourceManager->getMesh("cube");
 		entityManager.addComponent<GridTransform>(appleEntity);
 
 
@@ -85,14 +95,23 @@ namespace crsp {
 		transform = entityManager.addComponent<Transform>(snakeEntity);
 		transform->scale = glm::vec3(.5f);
 		meshRender = entityManager.addComponent<MeshRender>(snakeEntity);
-		meshRender->material = resourceManager->getMaterial("snake").get();
-		meshRender->mesh = resourceManager->getMesh("cube").get();
+		meshRender->material = resourceManager->getMaterial("snake");
+		meshRender->mesh = resourceManager->getMesh("cube");
 		entityManager.addComponent<GridTransform>(snakeEntity);
 		entityManager.addComponent<SnakeHead>(snakeEntity)->apple = appleEntity;
-		//GameObject& text = createGameObject();
-		//TextRenderComponent* textComp = text.addComponent<TextRenderComponent>();
-		//textComp->material = resourceManager->getMaterial("text");
-		//text.transform.scale.x = 1.0f;
+
+		// Text
+		Entity textTest = entityManager.createEntity();
+		Transform2D* transform2D = entityManager.addComponent<Transform2D>(textTest);
+		transform2D->width = 1.0f;
+		transform2D->height = 0.2f;
+		transform2D->position = glm::vec2(0.0f, -0.0f);
+
+		TextRender* textRender = entityManager.addComponent<TextRender>(textTest, 512, resourceManager->createMesh(Mesh::Builder()));
+		textRender->font = resourceManager->getFont("pixelated");
+		textRender->fontScale = 0.6f;
+		textRender->material = resourceManager->getMaterial("pixelated_font");
+		textRender->set("Hello! this is a test bruv. blaaaaa ffefwef wf wef wefwe f wef wef wefw ef wefw e");
 	}
 
 	void SnakeScene::start()
@@ -151,9 +170,7 @@ namespace crsp {
 		if (entityManager.getComponent<SnakeHead>(snakeEntity)->hit)
 			gameOver();
 
-		for (auto& renderObj : meshRenderSystem->renderObjects)
-		{
-			renderSurface(renderObj);
-		}
+		renderSurfaces(meshRenderSystem->renderObjects);
+		renderUI(textRenderSystem->renderObjects);
 	}
 }

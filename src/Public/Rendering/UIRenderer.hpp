@@ -7,15 +7,17 @@
 
 namespace crsp {
 	struct UIPushConstantData {
-		glm::mat4 modelMatrix{ 1.0f };
+		glm::vec2 position;
+		glm::vec2 scale;
+		float rotation;
 	};
 
 
 	struct UIRenderObject {
 		std::shared_ptr<Mesh> mesh;
 		std::shared_ptr<Material> material;
-		glm::mat4 transformMatrix{ 1.0f };
-
+		
+		UIPushConstantData transform;
 	};
 
 	class UIRenderer {

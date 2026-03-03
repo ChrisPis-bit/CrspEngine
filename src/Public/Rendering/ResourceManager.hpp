@@ -5,27 +5,13 @@
 #include "Rendering/Texture.hpp"
 #include "Rendering/Mesh.hpp"
 #include "Rendering/Material.hpp"
+#include "Rendering/FontAtlas.hpp"
 
 #include <memory.h>
 #include <unordered_map>
 #include <vector>
 
 namespace crsp {
-	struct GlyphInfo {
-		float u0, v0, u1, v1;
-		int width, height;
-		int bearingX, bearingY;
-		int advance;
-	};
-
-	class FontAtlas {
-	public:
-		std::unordered_map<char, GlyphInfo> glyphs;
-		std::vector<unsigned char> bitmap;
-		int width;
-		int height;
-	};
-
 	/// <summary>
 	/// Handles loading, creating and storing shared resources.
 	/// </summary>
@@ -33,6 +19,9 @@ namespace crsp {
 	public:
 		ResourceManager(Device& device, Renderer& renderer, GlobalDescriptorsManager& descriptorsManager);
 		~ResourceManager() = default;
+
+		std::shared_ptr<FontAtlas> loadFont(std::string filePath, std::string identifier);
+		std::shared_ptr<FontAtlas> getFont(std::string identifier);
 
 		std::shared_ptr<Texture2D> loadTexture(std::string filePath, std::string identifier);
 		std::shared_ptr<Texture2D> getTexture(std::string identifier);
@@ -44,12 +33,12 @@ namespace crsp {
 		std::shared_ptr<Material> createMaterial(uint32_t uniformBufferSize, uint32_t textureAmount, Material::RenderDomain renderDomain, const std::string& vertFilepath, const std::string& fragFilepath, std::string identifier);
 		std::shared_ptr<Material> getMaterial(std::string identifier);
 
-		std::shared_ptr<Texture2D> atlasTexture;
 	private:
 		Device& device;
 		GlobalDescriptorsManager& descriptorsManager;
 		Renderer& renderer;
 
+		std::unordered_map<std::string, std::shared_ptr<FontAtlas>> loadedFonts;
 		std::unordered_map<std::string, std::shared_ptr<Texture2D>> loadedTextures;
 		std::unordered_map<std::string, std::shared_ptr<Mesh>> loadedMeshes;
 		std::unordered_map<std::string, std::shared_ptr<Material>> loadedMaterials;

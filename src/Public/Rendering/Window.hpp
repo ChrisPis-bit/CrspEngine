@@ -19,6 +19,7 @@ namespace crsp {
 		static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
 		VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; }
 
+		float getAspect() { return (float)width / (float)height; }
 		bool wasResized() { return framebufferResized; }
 		void resetResizedFlag() { framebufferResized = false; }
 

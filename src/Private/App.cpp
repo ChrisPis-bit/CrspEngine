@@ -55,7 +55,7 @@ namespace crsp {
 		InputSystem inputSystem{ window };
 
 		// Initialize the scene
-		currentScene->init(&resourceManager, &inputSystem);
+		currentScene->init(&resourceManager, &inputSystem, &window);
 
 		// prepare render system
 		MaterialRenderer materialRenderer{ device };

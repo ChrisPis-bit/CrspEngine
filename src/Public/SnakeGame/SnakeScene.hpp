@@ -1,6 +1,7 @@
 #pragma once
 #include "SceneLogic/Scene.hpp"
 #include "ECS/Systems/MeshRenderSystem.hpp"
+#include "ECS/Systems/TextRenderSystem.hpp"
 #include "SnakeComponents.hpp"
 
 namespace crsp {
@@ -23,6 +24,7 @@ namespace crsp {
 		void reset();
 
 		std::shared_ptr<MeshRenderSystem> meshRenderSystem;
+		std::shared_ptr<TextRenderSystem> textRenderSystem;
 
 		Grid grid{ 12, 12 };
 

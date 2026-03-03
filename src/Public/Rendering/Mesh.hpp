@@ -133,11 +133,31 @@ namespace crsp {
 		void bind(VkCommandBuffer commandBuffer);
 		void draw(VkCommandBuffer commandBuffer);
 
+		/// <summary>
+		/// Write to the vertex buffer.
+		/// If the current vertexcount match the new vertex count, data only gets written.
+		/// If not, new vertex buffer will be created, which is performance intensive.
+		/// </summary>
+		/// <param name="vertices">Vertex data</param>
+		/// <param name="vertexSize">sizeof(VertexType)</param>
+		void writeVertices(const std::vector<uint8_t>& vertices, uint32_t vertexSize);
+
+		/// <summary>
+		/// Write to the index buffer.
+		/// If the current indexcount match the new index count, data only gets written.
+		/// If not, new index buffer will be created, which is performance intensive.
+		/// </summary>
+		/// <param name="indices">Index data</param>
+		void writeIndices(const std::vector<uint16_t>& indices);
+
 		static std::unique_ptr<Mesh> createMeshFromFile(Device& device, const std::string& filepath);
 
 	private:
 		void createVertexBuffer(const std::vector<uint8_t>& vertices, uint32_t vertexSize);
 		void createIndexBuffer(const std::vector<uint16_t>& indices);
+
+		void writeVertexBuffer(const std::vector<uint8_t>& vertices, uint32_t vertexSize);
+		void writeIndexBuffer(const std::vector<uint16_t>& indices);
 
 		bool hasIndexBuffer() { return indexCount > 3; };
 

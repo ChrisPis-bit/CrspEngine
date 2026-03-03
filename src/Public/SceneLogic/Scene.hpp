@@ -23,9 +23,10 @@ namespace crsp {
 		Scene() = default;
 		virtual ~Scene() = default;
 
-		void init(ResourceManager* resourceManager, InputSystem* inputSystem) {
+		void init(ResourceManager* resourceManager, InputSystem* inputSystem, Window* window) {
 			this->resourceManager = resourceManager;
 			this->inputSystem = inputSystem;
+			this->window = window;
 
 			loadResources();
 			registerSystems();
@@ -47,13 +48,15 @@ namespace crsp {
 		Camera& getCamera() { return camera; }
 		RenderData getRenderData() { return renderData; }
 		ResourceManager& getResourceManager() { return *resourceManager; }
+		Window& getWindow() { return *window; }
+		InputSystem& getInputSystem() { return *inputSystem; }
 
-		void renderSurface(RenderObject renderObj) {
-			renderData.renderObjects.push_back(renderObj);
+		void renderSurfaces(std::vector<RenderObject> renderObjects) {
+			renderData.renderObjects.insert(renderData.renderObjects.end(), renderObjects.begin(), renderObjects.end());
 		}
 
-		void renderUI(UIRenderObject UIRenderObj) {
-			renderData.UIrenderObjects.push_back(UIRenderObj);
+		void renderUI(std::vector<UIRenderObject> UIRenderObjects) {
+			renderData.UIrenderObjects.insert(renderData.UIrenderObjects.end(), UIRenderObjects.begin(), UIRenderObjects.end());
 		}
 
 	protected:
@@ -61,6 +64,7 @@ namespace crsp {
 		RenderData renderData{};
 		ResourceManager* resourceManager;
 		InputSystem* inputSystem;
+		Window* window;
 
 		Camera camera{};
 

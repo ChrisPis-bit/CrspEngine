@@ -26,7 +26,7 @@ namespace crsp {
 				nullptr);
 
 			UIPushConstantData push{};
-			push.modelMatrix = renderObject.transformMatrix;
+			push = renderObject.transform;
 
 			vkCmdPushConstants(frameInfo.commandBuffer,
 				renderObject.material->getPipelineLayout(),

@@ -5,6 +5,7 @@
 
 #include "Rendering/Mesh.hpp"
 #include "Rendering/Material.hpp"
+#include "Rendering/FontAtlas.hpp"
 
 namespace crsp {
 	struct Transform {
@@ -73,12 +74,38 @@ namespace crsp {
 
 	struct Transform2D {
 		glm::vec2 position{};
+		float width = 1.0f;
+		float height = 1.0f;
 		glm::vec2 scale{ 1.0f, 1.0f };
-		float rotation{0.0f};
+		float rotation{ 0.0f };
+
+		float getAspect() { return width / height; }
 	};
 
 	struct MeshRender {
-		Mesh* mesh;
-		Material* material;
+		std::shared_ptr<Mesh> mesh;
+		std::shared_ptr<Material> material;
+	};
+
+	struct TextRender {
+		TextRender() {}
+		TextRender(uint32_t maxCharacters, std::shared_ptr<Mesh> mesh) : maxCharacters(maxCharacters), mesh(mesh) {
+			// initialize mesh
+			
+		}
+
+		bool textUpdated;
+		float fontScale = 1;
+		std::string text;
+		uint32_t maxCharacters = 1024;
+
+		std::shared_ptr<Mesh> mesh;
+		std::shared_ptr<Material> material;
+		std::shared_ptr<FontAtlas> font;
+
+		void set(const std::string& string) {
+			text = string;
+			textUpdated = true;
+		}
 	};
 }
