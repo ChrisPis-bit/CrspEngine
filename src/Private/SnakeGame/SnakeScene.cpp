@@ -95,7 +95,7 @@ namespace crsp {
 		textRender->font = resourceManager->getFont("pixelated");
 		textRender->setFontScale(0.05f);
 		textRender->material = resourceManager->getMaterial("pixelated_font");
-		textRender->set("Hello! this is a test bruv. I got many a words , heterogondorea Ima write here lolll, hello ahahha hello lolll hiii");
+		textRender->set("Score: 0");
 
 		snakeEntity = entityManager.createEntity();
 		transform = entityManager.addComponent<Transform>(snakeEntity);

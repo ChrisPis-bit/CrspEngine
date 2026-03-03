@@ -23,6 +23,7 @@ namespace crsp {
 
 	struct SnakeHead {
 		constexpr static const char* SCORE_TEXT = "Score: ";
+
 		SnakeHead() {}
 		SnakeHead(Entity apple, Entity scoreText) : apple(apple), scoreText(scoreText) {}
 

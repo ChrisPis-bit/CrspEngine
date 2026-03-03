@@ -9,7 +9,7 @@ namespace crsp {
 	/// </summary>
 	class GridTransformSystem : public BaseSystem<Transform, GridTransform> {
 	public:
-		constexpr static float LERP_SPEED = 50.0f;
+		constexpr static float LERP_SPEED = 30.0f;
 
 		GridTransformSystem(EntityManager& entityManager, Grid& grid) : BaseSystem(entityManager), grid{ grid } {}
 		~GridTransformSystem() = default;
