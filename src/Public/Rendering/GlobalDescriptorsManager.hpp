@@ -17,6 +17,7 @@ namespace crsp {
 		glm::mat4 lightSpaceMat;
 		glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
 	};
+
 	class GlobalDescriptorsManager {
 	public:
 		GlobalDescriptorsManager(Device& device, uint32_t maxSets, uint32_t bufferCount, uint32_t textureCount, VkDescriptorImageInfo shadowDescriptorImageInfo);

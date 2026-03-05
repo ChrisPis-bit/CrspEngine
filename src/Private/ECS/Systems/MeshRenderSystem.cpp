@@ -9,9 +9,7 @@ namespace crsp {
 			Transform* transform = entityManager.getComponent<Transform>(entity);
 			MeshRender* meshData = entityManager.getComponent<MeshRender>(entity);
 
-			RenderObject renderObj;
-			renderObj.material = meshData->material;
-			renderObj.mesh = meshData->mesh;
+			RenderObject renderObj(meshData->mesh.get(), meshData->material.get());
 			renderObj.transformMatrix = transform->calculateTransformationMatrix();
 			renderObj.normalMatrix = transform->calculateNormalMatrix();
 			renderObjects.push_back(renderObj);

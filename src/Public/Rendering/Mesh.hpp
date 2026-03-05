@@ -166,6 +166,8 @@ namespace crsp {
 
 		static std::unique_ptr<Mesh> createMeshFromFile(Device& device, const std::string& filepath);
 
+		uint16_t getId() { return id; }
+
 	private:
 		void createVertexBuffer(const std::vector<uint8_t>& vertices, uint32_t vertexSize);
 		void createIndexBuffer(const std::vector<uint16_t>& indices);
@@ -183,5 +185,9 @@ namespace crsp {
 		uint32_t indexCount = 0;
 
 		Type type;
+
+		uint16_t id;
+
+		static uint16_t nextId;
 	};
 } // namespace

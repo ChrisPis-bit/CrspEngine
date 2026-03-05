@@ -26,12 +26,11 @@
 namespace crsp {
 	App::App()
 	{
-		currentScene = new SnakeScene();
+		currentScene = std::make_unique<SnakeScene>();
 	}
 
 	App::~App()
 	{
-		delete(currentScene);
 	}
 
 	void App::run()
@@ -84,7 +83,7 @@ namespace crsp {
 			float currentTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - startTime).count();
 			float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - lastTime).count();
 			lastTime = newTime;
-
+			std::cout << deltaTime << '\n';
 			// Update scene
 			currentScene->tick(deltaTime, currentTime);
 

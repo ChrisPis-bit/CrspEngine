@@ -176,8 +176,8 @@ namespace crsp {
 
 			// Render
 			UIRenderObject renderObject;
-			renderObject.material = textRender->material;
-			renderObject.mesh = textRender->mesh;
+			renderObject.material = textRender->material.get();
+			renderObject.mesh = textRender->mesh.get();
 			renderObject.transform.position = realPosition;
 			renderObject.transform.scale = realScale;
 			renderObject.transform.rotation = transform->rotation;

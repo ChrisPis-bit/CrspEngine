@@ -23,8 +23,14 @@ namespace std {
 }
 
 namespace crsp {
+	uint16_t Mesh::nextId = 1;
+
 	Mesh::Mesh(Device& device, const Mesh::Builder& builder, Type type) : device(device), type(type)
 	{
+		// Increment unique Id
+		id = nextId;
+		nextId++;
+
 		if (builder.vertexSize == 0)
 			return;
 

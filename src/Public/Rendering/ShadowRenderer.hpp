@@ -12,6 +12,11 @@
 #include <memory>
 
 namespace crsp {
+	/// <summary>
+	/// Basic implementation of a shadow render pass.
+	/// TODO: Write generic render pass code / implement proper render graph.
+	/// TODO: Align shadows with the camera frustum, and shadow cascading.
+	/// </summary>
 	class ShadowRenderer {
 		struct ShadowPushConstantData {
 			glm::mat4 modelMatrix;

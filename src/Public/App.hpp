@@ -30,13 +30,9 @@ namespace crsp {
 	private:
 		void mainLoop();
 
-		Scene* currentScene;
 		Window window{ width, height, "crsp" };
 		Device device{ window };
 		Renderer renderer{ window, device };
-
-
-		//std::vector<GameObject> gameObjects;
-
+		std::unique_ptr<Scene> currentScene;
 	};
 }

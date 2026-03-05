@@ -3,7 +3,7 @@
 
 namespace crsp {
 
-	constexpr static uint32_t MAX_ENTITIES = 500;
+	constexpr static uint32_t MAX_ENTITIES = 5000;
 	constexpr static uint32_t MAX_COMPONENTS = 32;
 	typedef std::bitset<MAX_COMPONENTS> ComponentMask;
 

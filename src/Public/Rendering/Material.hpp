@@ -30,6 +30,7 @@ namespace crsp {
 		VkPipelineLayout getPipelineLayout() { return pipelineLayout; }
 		void bindPipeline(VkCommandBuffer cmd) { pipeline->bind(cmd); }
 		RenderDomain getRenderDomain() { return renderDomain; }
+		uint16_t getId() { return id; }
 	private:
 		void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);
 		void createPipeline(VkRenderPass renderPass, const std::string& vertFilepath, const std::string& fragFilepath);
@@ -45,5 +46,9 @@ namespace crsp {
 		VkDescriptorSet descriptorSet;
 		Device& device;
 		RenderDomain renderDomain;
+
+		uint16_t id;
+
+		static uint16_t nextId;
 	};
 }

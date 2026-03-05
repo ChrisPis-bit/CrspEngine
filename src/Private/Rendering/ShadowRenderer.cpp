@@ -149,11 +149,12 @@ namespace crsp {
 
 	void ShadowRenderer::createPipeline()
 	{
+		// Single pipeline for shadows
+		// TODO: allow materials to have their own shadow pass shaders to allow for alpha cutout
 		PipelineConfigInfo pipelineConfig{};
 		Pipeline::defaultPipelineConfigInfo(pipelineConfig);
 		pipelineConfig.renderPass = renderPass;
 		pipelineConfig.pipelineLayout = pipelineLayout;
-		//pipelineConfig.rasterizationInfo.cullMode = VK_CULL_MODE_FRONT_BIT;
 
 		pipelineConfig.dynamicStateEnables = {};
 		pipelineConfig.dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -184,6 +185,7 @@ namespace crsp {
 	{
 		depthFormat = findDepthFormat();
 
+		// Create image info
 		VkImageCreateInfo imageInfo{};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -206,6 +208,7 @@ namespace crsp {
 			depthImage,
 			depthImageMemory);
 
+		// Create image view
 		VkImageViewCreateInfo viewInfo{};
 		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		viewInfo.image = depthImage;
@@ -226,6 +229,7 @@ namespace crsp {
 		VkPhysicalDeviceProperties properties{};
 		vkGetPhysicalDeviceProperties(device.getPhysicalDevice(), &properties);
 
+		// Create image sampler
 		VkSamplerCreateInfo samplerInfo{};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
 		samplerInfo.magFilter = VK_FILTER_NEAREST;
@@ -251,6 +255,8 @@ namespace crsp {
 
 	void ShadowRenderer::createRenderPass()
 	{
+		// Depth attachment
+		// Only depth needs to be rendered for shadow mapping
 		VkAttachmentDescription depthAttachment{};
 		depthAttachment.format = findDepthFormat();
 		depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -291,7 +297,7 @@ namespace crsp {
 			 }
 		};
 
-		std::array<VkAttachmentDescription, 1> attachments = { depthAttachment };
+		std::array<VkAttachmentDescription, 1> attachments = { depthAttachment }; 
 		VkRenderPassCreateInfo renderPassInfo{};
 		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 		renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());

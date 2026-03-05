@@ -6,10 +6,16 @@
 #include <stdexcept>
 
 namespace crsp {
+	uint16_t Material::nextId = 1;
+
 
 	Material::Material(Device& device, VkRenderPass renderPass, VkDeviceSize uniformBufferSize, uint32_t textures, DescriptorPool& pool, VkDescriptorSetLayout globalSetLayout, RenderDomain renderDomain, const std::string& vertFilepath, const std::string& fragFilepath)
 		: device{ device }, renderDomain{ renderDomain }, uniformBufferSize{ uniformBufferSize }
 	{
+		// Increment unique Id
+		id = nextId;
+		nextId++;
+
 		auto materialSetLayout = DescriptorSetLayout::Builder(device);
 
 		// Uniform buffer

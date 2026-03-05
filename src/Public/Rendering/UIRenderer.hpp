@@ -14,12 +14,15 @@ namespace crsp {
 
 
 	struct UIRenderObject {
-		std::shared_ptr<Mesh> mesh;
-		std::shared_ptr<Material> material;
+		Mesh* mesh;
+		Material* material;
 		
 		UIPushConstantData transform;
 	};
 
+	/// <summary>
+	/// Handles drawing 2D meshes to the screen.
+	/// </summary>
 	class UIRenderer {
 	public:
 		UIRenderer(Device& device);

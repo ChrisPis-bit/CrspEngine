@@ -16,12 +16,28 @@ namespace crsp {
 	};
 
 	struct RenderObject {
-		std::shared_ptr<Mesh> mesh;
-		std::shared_ptr<Material> material;
+		RenderObject(Mesh* mesh, Material* material) : mesh(mesh), material(material) {
+			if (!mesh || !material)
+				key = 0; // Invalid render obj
+
+			key = (uint32_t)material->getId() << 16 | (uint32_t)mesh->getId();
+		}
+
+		bool operator<(const RenderObject& other) const {
+			return key < other.key;
+		}
+
+		uint32_t key;
+		Mesh* mesh;
+		Material* material;
 		glm::mat4 transformMatrix {1.0f};
 		glm::mat3 normalMatrix {1.0f};
 	};
 
+
+	/// <summary>
+	/// Handles drawing 3D meshes to the screen.
+	/// </summary>
 	class MaterialRenderer {
 	public:
 		MaterialRenderer(Device& device);
