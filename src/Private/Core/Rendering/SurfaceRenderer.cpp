@@ -1,16 +1,16 @@
-#include "Rendering/MaterialRenderer.hpp"
+#include "Rendering/SurfaceRenderer.hpp"
 
 #include <stdexcept>
 #include <algorithm>
 
 namespace crsp {
-	MaterialRenderer::MaterialRenderer(Device& device) : device(device)
+	SurfaceRenderer::SurfaceRenderer(Device& device) : device(device)
 	{
 	}
-	MaterialRenderer::~MaterialRenderer()
+	SurfaceRenderer::~SurfaceRenderer()
 	{
 	}
-	void MaterialRenderer::render(FrameInfo& frameInfo, std::vector<RenderObject>& renderObjects)
+	void SurfaceRenderer::render(FrameInfo& frameInfo, std::vector<RenderObject>& renderObjects)
 	{
 		Material* prevMaterial = nullptr;
 		Mesh* prevMesh = nullptr;

@@ -1,9 +1,10 @@
 #include "Rendering/ResourceManager.hpp"
 #include "SceneLogic/InputSystem.hpp"
-#include "Rendering/MaterialRenderer.hpp"
+#include "Rendering/SurfaceRenderer.hpp"
 #include "Rendering/UIRenderer.hpp"
 #include "ECS/EntityManager.hpp"
 #include "Camera.hpp"
+#include "Core/Rendering/DirectionalLight.hpp"
 
 #include <vector>
 
@@ -47,6 +48,7 @@ namespace crsp {
 		}
 
 		Camera& getCamera() { return camera; }
+		DirectionalLight& getMainLight() { return mainLight; }
 		RenderData& getRenderData() { return renderData; }
 		ResourceManager& getResourceManager() { return *resourceManager; }
 		Window& getWindow() { return *window; }
@@ -68,6 +70,7 @@ namespace crsp {
 		Window* window;
 
 		Camera camera{};
+		DirectionalLight mainLight{};
 
 		EntityManager entityManager;
 	};

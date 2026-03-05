@@ -3,6 +3,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace crsp {
+    DirectionalLight::DirectionalLight()
+    {
+        // Set default directional light params
+        setOrthographicProjection(-10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 15.0f);
+        float angle = 0;
+        glm::vec3 lightDir = glm::normalize(glm::vec3(glm::cos(angle), -3, glm::sin(angle)));
+        setViewDirection(lightDir * 10.0f, lightDir, glm::vec3(0, 1, 0));
+    }
+
     void DirectionalLight::setOrthographicProjection(
         float left, float right, float top, float bottom, float near, float far) {
         projectionMatrix = glm::ortho(left, right, bottom, top, near, far);

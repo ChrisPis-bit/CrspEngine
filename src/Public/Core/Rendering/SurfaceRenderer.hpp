@@ -38,13 +38,13 @@ namespace crsp {
 	/// <summary>
 	/// Handles drawing 3D meshes to the screen.
 	/// </summary>
-	class MaterialRenderer {
+	class SurfaceRenderer {
 	public:
-		MaterialRenderer(Device& device);
-		~MaterialRenderer();
+		SurfaceRenderer(Device& device);
+		~SurfaceRenderer();
 
-		MaterialRenderer(const MaterialRenderer&) = delete;
-		MaterialRenderer operator=(const MaterialRenderer&) = delete;
+		SurfaceRenderer(const SurfaceRenderer&) = delete;
+		SurfaceRenderer operator=(const SurfaceRenderer&) = delete;
 
 		void render(FrameInfo& frameInfo, std::vector<RenderObject>& renderObjects);
 

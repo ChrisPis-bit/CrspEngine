@@ -1,5 +1,4 @@
 #include "Rendering/UIRenderer.hpp"
-#include "Rendering/MaterialRenderer.hpp"
 
 namespace crsp {
 	UIRenderer::UIRenderer(Device& device) : device(device)

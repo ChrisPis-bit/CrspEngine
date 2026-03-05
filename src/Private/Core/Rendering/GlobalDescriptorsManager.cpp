@@ -2,14 +2,15 @@
 #include <Rendering/SwapChain.hpp>
 
 namespace crsp {
-	GlobalDescriptorsManager::GlobalDescriptorsManager(Device& device, uint32_t maxSets, uint32_t bufferCount, uint32_t textureCount, VkDescriptorImageInfo shadowDescriptorImageInfo) : device{device}
+	GlobalDescriptorsManager::GlobalDescriptorsManager(Device& device, VkDescriptorImageInfo shadowDescriptorImageInfo) : device{device}
 	{
+		// TODO: Add pool manager that creates new pools on demand.
 		globalPool = DescriptorPool::Builder(device)
-			.setMaxSets(2 * SwapChain::MAX_FRAMES_IN_FLIGHT + maxSets) // Global descriptor sets + any additional material sets
+			.setMaxSets(2 * SwapChain::MAX_FRAMES_IN_FLIGHT + MAX_DECRIPTOR_SETS) // Global descriptor sets + any additional material sets
 			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SwapChain::MAX_FRAMES_IN_FLIGHT) // Global UBO buffer
-			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, bufferCount) // Any additional uniform buffers
+			.addPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, MAX_UNIFORM_BUFFER_DESCRIPTORS) // Any additional uniform buffers
 			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1) // Shadow map
-			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, textureCount) // Any additional texture resources
+			.addPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, MAX_TEXTURE_DESCRIPTORS) // Any additional texture resources
 			.build();
 
 		// Create global UBO buffers

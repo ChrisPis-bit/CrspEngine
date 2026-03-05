@@ -23,7 +23,7 @@ namespace crsp {
 		int getFontSize() { return fontSize; }
 		float getYAdvance() { return yAdvance; }
 
-		VkDescriptorImageInfo descriptorInfo() { return atlas->descriptorInfo(); }
+		Texture2D& getTexture() { return *atlas; }
 
 	private:
 		std::unique_ptr<Texture2D> atlas;

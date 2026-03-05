@@ -1,7 +1,7 @@
 #pragma once
 #include "ECS/System.hpp"
 #include "ECS/BaseComponents.hpp"
-#include "Rendering/MaterialRenderer.hpp"
+#include "Rendering/SurfaceRenderer.hpp"
 
 namespace crsp {
 	class MeshRenderSystem : public BaseSystem<Transform, MeshRender>{

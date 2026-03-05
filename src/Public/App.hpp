@@ -8,13 +8,13 @@
 #include <vector>
 #include <memory>
 
-#include "Rendering/Window.hpp"
-#include "Rendering/Device.hpp"
-#include "Rendering/Renderer.hpp"
-#include "Rendering/ShadowRenderer.hpp"
-#include "Rendering/UIRenderer.hpp"
-#include "Rendering/Descriptors.hpp"
-#include "SceneLogic/Scene.hpp"
+#include "Core/Rendering/Window.hpp"
+#include "Core/Rendering/Device.hpp"
+#include "Core/Rendering/Renderer.hpp"
+#include "Core/Rendering/ShadowRenderer.hpp"
+#include "Core/Rendering/UIRenderer.hpp"
+#include "Core/Rendering/Descriptors.hpp"
+#include "Core/SceneLogic/Scene.hpp"
 
 namespace crsp {
 	class App {

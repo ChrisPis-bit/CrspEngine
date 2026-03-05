@@ -1,7 +1,7 @@
 #pragma once
-#include "SceneLogic/Scene.hpp"
-#include "ECS/Systems/MeshRenderSystem.hpp"
-#include "ECS/Systems/TextRenderSystem.hpp"
+#include "Core/SceneLogic/Scene.hpp"
+#include "Core/ECS/Systems/MeshRenderSystem.hpp"
+#include "Core/ECS/Systems/TextRenderSystem.hpp"
 #include "SnakeGame/Systems/SnakeControllerSystem.hpp"
 #include "SnakeComponents.hpp"
 
@@ -20,7 +20,7 @@ namespace crsp {
 		void spawnEntities() override;
 		void start() override;
 		void update(float deltaTime, float totalTime) override;
-		void render();
+		void render() override;
 		void updateCameraAspect(float aspectRatio) override;
 	private:
 

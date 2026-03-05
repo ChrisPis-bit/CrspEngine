@@ -2,6 +2,7 @@
 #include "Descriptors.hpp"
 #include "Pipeline.hpp"
 #include "Buffer.hpp"
+#include "Texture.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -22,7 +23,7 @@ namespace crsp {
 		Material(Device& device, VkRenderPass renderPass, VkDeviceSize uniformBufferSize, uint32_t textures, DescriptorPool& pool, VkDescriptorSetLayout globalSetLayout, RenderDomain renderDomain, const std::string& vertFilepath, const std::string& fragFilepath);
 		~Material();
 
-		void writeImage(uint32_t imageIndex, VkDescriptorImageInfo* imageInfo);
+		void writeImage(uint32_t imageIndex, Texture2D& texture);
 		void writeUniform(void* data);
 		void build();
 

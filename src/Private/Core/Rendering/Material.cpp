@@ -1,5 +1,5 @@
 #include "Rendering/Material.hpp"
-#include "Rendering/MaterialRenderer.hpp"
+#include "Rendering/SurfaceRenderer.hpp"
 #include "Rendering/UIRenderer.hpp"
 
 #include <cassert>
@@ -47,9 +47,9 @@ namespace crsp {
 		vkDestroyPipelineLayout(device.getDevice(), pipelineLayout, nullptr);
 	}
 
-	void Material::writeImage(uint32_t imageIndex, VkDescriptorImageInfo* imageInfo)
+	void Material::writeImage(uint32_t imageIndex, Texture2D& texture)
 	{
-		descriptorWriter->writeImage(imageIndex + 1, imageInfo);
+		descriptorWriter->writeImage(imageIndex + 1, &texture.descriptorInfo());
 	}
 	void Material::writeUniform(void* data)
 	{

@@ -25,7 +25,7 @@ namespace crsp {
 		Texture2D(Device& device, const Texture2D::Builder& builder);
 		~Texture2D();
 
-		VkDescriptorImageInfo descriptorInfo();
+		VkDescriptorImageInfo& descriptorInfo() { return imageInfo; }
 
 		static std::unique_ptr<Texture2D> createTextureFromFile(Device& device, const std::string& filepath, Filter filter = Filter::LINEAR);
 
@@ -42,6 +42,7 @@ namespace crsp {
 		VkDeviceMemory textureImageMemory;
 		VkFormat format;
 		VkFilter filter;
+		VkDescriptorImageInfo imageInfo{};
 
 		uint32_t mipLevels;
 	};

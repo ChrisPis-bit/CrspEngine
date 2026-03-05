@@ -18,9 +18,16 @@ namespace crsp {
 		glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
 	};
 
+	/// <summary>
+	/// Handles the global descriptor pool and global descriptors.
+	/// </summary>
 	class GlobalDescriptorsManager {
 	public:
-		GlobalDescriptorsManager(Device& device, uint32_t maxSets, uint32_t bufferCount, uint32_t textureCount, VkDescriptorImageInfo shadowDescriptorImageInfo);
+		constexpr static unsigned int MAX_DECRIPTOR_SETS = 50;
+		constexpr static unsigned int MAX_UNIFORM_BUFFER_DESCRIPTORS = 20;
+		constexpr static unsigned int MAX_TEXTURE_DESCRIPTORS = 10;
+
+		GlobalDescriptorsManager(Device& device, VkDescriptorImageInfo shadowDescriptorImageInfo);
 
 		VkDescriptorSet getGlobalDescriptorSet(uint32_t frameIndex) { return globalDescriptorSets[frameIndex]; }
 		VkDescriptorSet getLightDescriptorSet(uint32_t frameIndex) { return lightDescriptorSets[frameIndex]; }

@@ -14,6 +14,11 @@ namespace crsp {
 		createTextureImage(builder);
 		createTextureImageView();
 		createTextureSampler();
+
+		// Create image info
+		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo.imageView = textureImageView;
+		imageInfo.sampler = textureSampler;
 	}
 
 	Texture2D::~Texture2D()
@@ -23,16 +28,6 @@ namespace crsp {
 		vkDestroyImageView(device.getDevice(), textureImageView, nullptr);
 		vkDestroyImage(device.getDevice(), textureImage, nullptr);
 		vkFreeMemory(device.getDevice(), textureImageMemory, nullptr);
-	}
-
-	VkDescriptorImageInfo Texture2D::descriptorInfo()
-	{
-		VkDescriptorImageInfo imageInfo{};
-		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		imageInfo.imageView = textureImageView;
-		imageInfo.sampler = textureSampler;
-
-		return imageInfo;
 	}
 
 	std::unique_ptr<Texture2D> Texture2D::createTextureFromFile(Device& device, const std::string& filepath, Filter filter)

@@ -3,9 +3,9 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 
-#include "Rendering/Mesh.hpp"
-#include "Rendering/Material.hpp"
-#include "Rendering/FontAtlas.hpp"
+#include "Core/Rendering/Mesh.hpp"
+#include "Core/Rendering/Material.hpp"
+#include "Core/Rendering/FontAtlas.hpp"
 
 namespace crsp {
 	struct Transform {

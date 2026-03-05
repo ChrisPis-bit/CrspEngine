@@ -26,7 +26,7 @@ namespace crsp {
 			"shaders/simple_shader.vert.spv",
 			"shaders/simple_shader.frag.spv",
 			"snake_material");
-		snakeMaterial->writeImage(0, &snakeAtlasTexture->descriptorInfo());
+		snakeMaterial->writeImage(0, *snakeAtlasTexture);
 		BaseMaterial baseMat{};
 		baseMat.color = glm::vec4(1.0, 1.0, 1.0, 1.0);
 		snakeMaterial->writeUniform(&baseMat);
@@ -54,7 +54,7 @@ namespace crsp {
 			"shaders/text.vert.spv",
 			"shaders/text.frag.spv",
 			"pixelated_font");
-		fontMaterial->writeImage(0, &font->descriptorInfo());
+		fontMaterial->writeImage(0, font->getTexture());
 		fontMaterial->build();
 	}
 
@@ -85,7 +85,9 @@ namespace crsp {
 		transform2D->width = 0.5f;
 		transform2D->height = 0.2f;
 		transform2D->position = glm::vec2(0.0f, -0.5f);
-		TextRender* textRender = entityManager.addComponent<TextRender>(scoreTextEntity, 512, resourceManager->createMesh(Mesh::Builder(), Mesh::Type::DYNAMIC));
+
+		Mesh::Builder builder {};
+		TextRender* textRender = entityManager.addComponent<TextRender>(scoreTextEntity, 512, resourceManager->createMesh(builder, Mesh::Type::DYNAMIC));
 		textRender->setAlignment(TextRender::Alignment::CENTER);
 		textRender->font = resourceManager->getFont("pixelated");
 		textRender->setFontScale(0.05f);

@@ -1,9 +1,9 @@
 #pragma once
-#include "ECS/System.hpp"
-#include "ECS/BaseComponents.hpp"
+#include "Core/ECS/System.hpp"
+#include "Core/ECS/BaseComponents.hpp"
 #include "SnakeGame/SnakeComponents.hpp"
-#include "SceneLogic/InputSystem.hpp"
-#include "Rendering/ResourceManager.hpp"
+#include "Core/SceneLogic/InputSystem.hpp"
+#include "Core/Rendering/ResourceManager.hpp"
 
 #include <queue>
 

@@ -5,7 +5,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 
-#include "Rendering/Window.hpp"
+#include "Core/Rendering/Window.hpp"
 
 namespace crsp {
 	class Camera {
