@@ -22,6 +22,8 @@ namespace crsp {
 				viewMatrix[2][2]);
 		}
 
+		bool renderShadows = true;
+
 	private:
 
 		glm::mat4 projectionMatrix{ 1.0f };

@@ -1,7 +1,9 @@
 #pragma once
 
+#include <iostream>
 #include <functional>
 #include <cstdint>
+#include <random>
 
 namespace crsp {
 
@@ -16,6 +18,13 @@ namespace crsp {
 		return minInclusive + rand() % maxExclusive;
 	}
 
+	inline float randomFloatRange(float minVal, float maxVal) {
+		static std::random_device rd;  // only used to seed once
+		static std::mt19937 gen(rd()); // Mersenne Twister RNG
+		std::uniform_real_distribution<float> dist(minVal, maxVal);
+
+		return dist(gen);
+	}
 
 	inline uint32_t nextPowerOfTwo(uint32_t v)
 	{

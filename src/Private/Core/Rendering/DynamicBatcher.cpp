@@ -23,6 +23,8 @@ namespace crsp {
 		Material* prevMaterial = nullptr;
 		Mesh* prevMesh = nullptr;
 
+		uint32_t prevKey = 0;
+
 		// Sorts render objects based on their material and mesh
 		std::sort(renderObjects.begin(), renderObjects.end());
 
@@ -34,7 +36,7 @@ namespace crsp {
 				continue;
 
 			// New batch starts when previous material and mesh aren't the same anymore
-			if (prevMaterial != renderObject.material || prevMesh != renderObject.mesh) {
+			if (prevKey != renderObject.key) {
 				if (instanceBatch.size() != 0) {
 					// Writes transform data to the staging buffer
 					uploadToInstanceBuffer(instanceBatch, currentOffset);
@@ -55,6 +57,7 @@ namespace crsp {
 
 				prevMaterial = renderObject.material;
 				prevMesh = renderObject.mesh;
+				prevKey = renderObject.key;
 			}
 
 			// Add new instance to the current recording batch
@@ -96,6 +99,7 @@ namespace crsp {
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
 		currentBufferSize = instanceCount;
+		stagingBuffer->map();
 	}
 
 	void DynamicBatcher::uploadToInstanceBuffer(std::vector<InstanceData>& instanceData, int currentOffset)
@@ -112,8 +116,6 @@ namespace crsp {
 		if (renderInstances > currentBufferSize) {
 			createInstanceBuffers(nextPowerOfTwo(renderInstances));
 		}
-
-		stagingBuffer->map();
 	}
 
 	void DynamicBatcher::writeToInstanceBuffer(int renderInstances)

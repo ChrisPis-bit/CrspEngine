@@ -16,6 +16,7 @@ namespace crsp {
 		glm::mat4 proj;
 		glm::mat4 lightSpaceMat;
 		glm::vec3 lightDir = glm::normalize(glm::vec3(1.0f, -3.0f, -1.0f));
+		int renderShadows;
 	};
 
 	/// <summary>

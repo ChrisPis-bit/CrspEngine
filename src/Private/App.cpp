@@ -21,11 +21,12 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+#include <Boids/BoidsScene.hpp>
 
 namespace crsp {
 	App::App()
 	{
-		currentScene = std::make_unique<SnakeScene>();
+		currentScene = std::make_unique<BoidsScene>();
 	}
 
 	App::~App()
@@ -110,6 +111,7 @@ namespace crsp {
 				ubo.proj = currentScene->getCamera().getProjection();
 				ubo.lightSpaceMat = currentScene->getMainLight().getProjectionViewMatrix();
 				ubo.lightDir = currentScene->getMainLight().getDirection();
+				ubo.renderShadows = currentScene->getMainLight().renderShadows;
 				globalDescriptorsManager.updateUBO(frameIndex, ubo);
 
 				// batch draw calls
@@ -117,7 +119,7 @@ namespace crsp {
 
 				// shadow rendering
 				shadowRenderer.beginShadowRenderPass(commandBuffer);
-				shadowRenderer.draw(frameInfo, frameBatch);
+				if (currentScene->getMainLight().renderShadows)	shadowRenderer.draw(frameInfo, frameBatch);
 				shadowRenderer.endShadowRenderPass(commandBuffer);
 
 				// main rendering

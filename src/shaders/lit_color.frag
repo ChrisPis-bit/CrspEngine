@@ -14,6 +14,7 @@ layout(set = 0, binding = 0) uniform globalUBO {
     mat4 projectionMatrix;
     mat4 lightSpaceMat;
     vec3 lightDir;
+    bool renderShadows;
 } global;
 
 layout(set = 1, binding = 0) uniform localUBO {
@@ -30,6 +31,8 @@ layout( push_constant ) uniform constants
 const float AMBIENT = 0.1;
 
 float shadowCalculation(vec4 lightSpaceCoord, vec3 lightDir, vec3 normal){
+    if(!global.renderShadows) return 0;
+
     vec3 projCoords = lightSpaceCoord.xyz / lightSpaceCoord.w;
 
     float currentDepth = projCoords.z;

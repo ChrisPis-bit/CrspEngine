@@ -11,6 +11,7 @@ layout(set = 0, binding = 0) uniform globalUBO {
     mat4 projectionMatrix;
     mat4 lightSpaceMat;
     vec3 lightDir;
+    bool renderShadows;
 } global;
 
 //push constants block

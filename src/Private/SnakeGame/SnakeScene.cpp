@@ -23,8 +23,8 @@ namespace crsp {
 		// Create materials
 		std::shared_ptr<Material> snakeMaterial = resourceManager->createMaterial(sizeof(BaseMaterial), 1,
 			Material::RenderDomain::Surface3D,
-			"shaders/simple_shader.vert.spv",
-			"shaders/simple_shader.frag.spv",
+			"shaders/lit_textured.vert.spv",
+			"shaders/lit_textured.frag.spv",
 			"snake_material");
 		snakeMaterial->writeImage(0, *snakeAtlasTexture);
 		BaseMaterial baseMat{};
@@ -41,13 +41,6 @@ namespace crsp {
 		stoneMat.color = glm::vec4(0.5, 0.5, 0.5, 1.0);
 		environmentMaterial->writeUniform(&stoneMat);
 		environmentMaterial->build();
-
-		std::shared_ptr<Material> textMaterial = resourceManager->createMaterial(0, 0,
-			Material::RenderDomain::UI,
-			"shaders/text.vert.spv",
-			"shaders/text.frag.spv",
-			"text");
-		textMaterial->build();
 
 		std::shared_ptr<Material> fontMaterial = resourceManager->createMaterial(0, 1,
 			Material::RenderDomain::UI,

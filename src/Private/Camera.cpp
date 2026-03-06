@@ -55,7 +55,7 @@ namespace crsp {
 		rotate.x += deltaMouse.y;
 
 		if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon())
-			rotation += lookSensitivity * glm::normalize(rotate);
+			rotation += lookSensitivity * rotate;
 
 		rotation.x = glm::clamp(rotation.x, -1.5f, 1.5f);
 		rotation.y = glm::mod(rotation.y, glm::two_pi<float>());
