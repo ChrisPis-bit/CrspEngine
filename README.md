@@ -1,6 +1,7 @@
 ## CRSP Engine
 This repository contains my first custom Vulkan C++ game engine. With this project, I aim to familiarize myself more with graphics programming, experiment with different concepts such as ECS, and just have some fun.
 The engine contains a simple Vulkan rendering pipeline with dynamic batched rendering, and a simple ECS implementation for the game logic. A sample SnakeGame and Boids scene are implemented to show the engine usage.
+
 ![SnakeScene](https://github.com/user-attachments/assets/69a9a8b9-2ff1-4a21-a19b-02bd437a2ac5)
 
 # Dependencies
@@ -13,7 +14,9 @@ Dependencies are managed through vcpkg.
 Install vcpkg:
 
 git clone https://github.com/microsoft/vcpkg/bootstrap-vcpkg.sh   # Linux/macOS
+
 git clone https://github.com/microsoft/vcpkg/bootstrap-vcpkg.bat   # Windows
+
 
 Then you can build with CMake, and run the generated CrspEngine.exe
 
