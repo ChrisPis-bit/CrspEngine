@@ -8,7 +8,6 @@
 #include "Core/Rendering/ResourceManager.hpp"
 #include "Core/Rendering/DynamicBatcher.hpp"
 #include "Core/SceneLogic/InputSystem.hpp"
-#include "SnakeGame/SnakeScene.hpp"
 
 //std
 #include <iostream>
@@ -21,12 +20,11 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
-#include <Boids/BoidsScene.hpp>
 
 namespace crsp {
-	App::App()
+	App::App(std::unique_ptr<Scene> startScene)
 	{
-		currentScene = std::make_unique<BoidsScene>();
+		currentScene = std::move(startScene);
 	}
 
 	App::~App()
@@ -79,7 +77,6 @@ namespace crsp {
 			float currentTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - startTime).count();
 			float deltaTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - lastTime).count();
 			lastTime = newTime;
-			std::cout << deltaTime << '\n';
 
 			// Update scene
 			currentScene->tick(deltaTime, currentTime);

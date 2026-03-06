@@ -15,8 +15,8 @@ struct BoidSettings {
 	float cohesionWeight = 0.6f;
 
 	float separationRadius = 2.0f;
-	float alignmentRadius = 3.0f;
-	float cohesionRadius = 4.0f;
+	float alignmentRadius = 5.0f;
+	float cohesionRadius = 10.0f;
 
 	float maxSpeed = 5.0f;
 

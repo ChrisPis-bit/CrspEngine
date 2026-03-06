@@ -72,6 +72,7 @@ namespace crsp {
 
 	void BoidsScene::update(float deltaTime, float totalTime)
 	{
+		std::cout << deltaTime << '\n';
 		camera.move(getWindow().getGLFWwindow(), deltaTime);
 	}
 

@@ -19,7 +19,7 @@
 namespace crsp {
 	class App {
 	public:
-		App();
+		App(std::unique_ptr<Scene> startScene);
 		~App();
 
 		void run();
