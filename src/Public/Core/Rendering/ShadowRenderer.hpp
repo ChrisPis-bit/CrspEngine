@@ -37,7 +37,7 @@ namespace crsp {
 		void beginShadowRenderPass(VkCommandBuffer commandBuffer);
 		void endShadowRenderPass(VkCommandBuffer commandBuffer);
 
-		void draw(FrameInfo& frameInfo, std::vector<RenderObject>& renderObjects);
+		void draw(FrameInfo& frameInfo, DynamicBatcher::FrameBatch& frameBatch);
 
 		const uint32_t width = 1024, height = 1024;
 

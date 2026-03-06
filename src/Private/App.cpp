@@ -6,6 +6,7 @@
 #include "Core/Rendering/Material.hpp"
 #include "Core/Rendering/GlobalDescriptorsManager.hpp"
 #include "Core/Rendering/ResourceManager.hpp"
+#include "Core/Rendering/DynamicBatcher.hpp"
 #include "Core/SceneLogic/InputSystem.hpp"
 #include "SnakeGame/SnakeScene.hpp"
 
@@ -57,6 +58,7 @@ namespace crsp {
 		// prepare render system
 		SurfaceRenderer surfaceRenderer{ device };
 		UIRenderer uiRenderer{ device };
+		DynamicBatcher dynamicBatcher{ device };
 
 		// prepare start time
 		auto lastTime = std::chrono::high_resolution_clock::now();
@@ -110,14 +112,17 @@ namespace crsp {
 				ubo.lightDir = currentScene->getMainLight().getDirection();
 				globalDescriptorsManager.updateUBO(frameIndex, ubo);
 
+				// batch draw calls
+				DynamicBatcher::FrameBatch frameBatch = dynamicBatcher.batchDraws(renderData.renderObjects);
+
 				// shadow rendering
 				shadowRenderer.beginShadowRenderPass(commandBuffer);
-				shadowRenderer.draw(frameInfo, renderData.renderObjects);
+				shadowRenderer.draw(frameInfo, frameBatch);
 				shadowRenderer.endShadowRenderPass(commandBuffer);
 
 				// main rendering
 				renderer.beginSwapChainRenderPass(commandBuffer);
-				surfaceRenderer.render(frameInfo, renderData.renderObjects);
+				surfaceRenderer.render(frameInfo, frameBatch);
 				uiRenderer.render(frameInfo, renderData.UIrenderObjects);
 
 				renderer.endSwapChainRenderPass(commandBuffer);

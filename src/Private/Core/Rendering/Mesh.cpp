@@ -55,7 +55,7 @@ namespace crsp {
 
 	void Mesh::bindInstanced(VkCommandBuffer commandBuffer, VkBuffer instanceBuffer, VkDeviceSize instanceOffset)
 	{
-		VkBuffer vertexBuffers[] = { vertexBuffer->getBuffer(), instanceBuffer};
+		VkBuffer vertexBuffers[] = { vertexBuffer->getBuffer(), instanceBuffer };
 		VkDeviceSize offsets[] = { 0 , instanceOffset };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 2, vertexBuffers, offsets);
 
@@ -123,7 +123,7 @@ namespace crsp {
 			break;
 		}
 
-		writeVertexBuffer(vertices, vertexSize);	
+		writeVertexBuffer(vertices, vertexSize);
 	}
 	void Mesh::createIndexBuffer(const std::vector<uint16_t>& indices)
 	{
@@ -178,7 +178,7 @@ namespace crsp {
 
 			device.copyBuffer(stagingBuffer.getBuffer(), vertexBuffer->getBuffer(), bufferSize);
 			break;
-		}	
+		}
 	}
 
 	void Mesh::writeIndexBuffer(const std::vector<uint16_t>& indices)

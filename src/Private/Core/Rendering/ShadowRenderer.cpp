@@ -94,7 +94,7 @@ namespace crsp {
 		vkCmdEndRenderPass(commandBuffer);
 	}
 
-	void ShadowRenderer::draw(FrameInfo& frameInfo, std::vector<RenderObject>& renderObjects)
+	void ShadowRenderer::draw(FrameInfo& frameInfo, DynamicBatcher::FrameBatch& frameBatch)
 	{
 		pipeline->bind(frameInfo.commandBuffer);
 
@@ -106,23 +106,10 @@ namespace crsp {
 			0,
 			nullptr);
 
-		for (auto& renderObject : renderObjects)
-		{
-			if (!renderObject.mesh)
-				continue;
-
-			ShadowPushConstantData push{};
-			push.modelMatrix = renderObject.transformMatrix;
-
-			vkCmdPushConstants(frameInfo.commandBuffer,
-				pipelineLayout,
-				VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-				0,
-				sizeof(ShadowPushConstantData),
-				&push);
-
-			renderObject.mesh->bind(frameInfo.commandBuffer);
-			renderObject.mesh->draw(frameInfo.commandBuffer);
+		for (auto& batch : frameBatch.batches) {
+			// Draw batched
+			batch.mesh->bindInstanced(frameInfo.commandBuffer, frameBatch.instanceBuffer, batch.offset * sizeof(InstanceData));
+			batch.mesh->draw(frameInfo.commandBuffer, batch.instances, 0);
 		}
 	}
 

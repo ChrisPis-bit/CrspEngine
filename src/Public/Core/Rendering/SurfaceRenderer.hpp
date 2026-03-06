@@ -5,6 +5,7 @@
 #include "FrameInfo.hpp"
 #include "Mesh.hpp"
 #include "Material.hpp"
+#include "DynamicBatcher.hpp"
 
 #include <memory>
 
@@ -40,7 +41,7 @@ namespace crsp {
 	/// </summary>
 	class SurfaceRenderer {
 	public:
-		constexpr static unsigned int MAX_INSTANCE_BUFFER_COUNT = 100000;
+		constexpr static unsigned int START_BUFFER_SIZE = 128;
 
 		SurfaceRenderer(Device& device);
 		~SurfaceRenderer();
@@ -48,16 +49,9 @@ namespace crsp {
 		SurfaceRenderer(const SurfaceRenderer&) = delete;
 		SurfaceRenderer operator=(const SurfaceRenderer&) = delete;
 
-		void render(FrameInfo& frameInfo, std::vector<RenderObject>& renderObjects);
+		void render(FrameInfo& frameInfo, DynamicBatcher::FrameBatch& frameBatch);
 
 	private:
-
-		void uploadToInstanceBuffer(std::vector<InstanceData>& instanceData, int currentOffset, int currentFrame);
-		void mapInstanceBuffer(int currentFrame);
-		void writeToInstanceBuffer(int renderInstances, int currentFrame);
-
-		std::vector<std::unique_ptr<Buffer>> instanceBuffers;
-		std::vector<std::unique_ptr<Buffer>> stagingBuffers;
 
 		Device& device;
 	};

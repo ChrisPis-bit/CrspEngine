@@ -10,8 +10,6 @@ layout(location = 1) out vec3 fragNormal;
 layout(location = 2) out vec2 fragTexCoord;
 layout(location = 3) out vec4 fragLightSpaceCoord;
 
-
-
 layout(location = 4) in mat4 modelMatrix;
 layout(location = 8) in mat4 normalMatrix;
 
