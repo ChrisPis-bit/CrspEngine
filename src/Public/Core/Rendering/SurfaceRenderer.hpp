@@ -40,6 +40,8 @@ namespace crsp {
 	/// </summary>
 	class SurfaceRenderer {
 	public:
+		constexpr static unsigned int MAX_INSTANCE_BUFFER_COUNT = 100000;
+
 		SurfaceRenderer(Device& device);
 		~SurfaceRenderer();
 
@@ -49,6 +51,13 @@ namespace crsp {
 		void render(FrameInfo& frameInfo, std::vector<RenderObject>& renderObjects);
 
 	private:
+
+		void uploadToInstanceBuffer(std::vector<InstanceData>& instanceData, int currentOffset, int currentFrame);
+		void mapInstanceBuffer(int currentFrame);
+		void writeToInstanceBuffer(int renderInstances, int currentFrame);
+
+		std::vector<std::unique_ptr<Buffer>> instanceBuffers;
+		std::vector<std::unique_ptr<Buffer>> stagingBuffers;
 
 		Device& device;
 	};

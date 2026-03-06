@@ -53,13 +53,24 @@ namespace crsp {
 		}
 	}
 
-	void Mesh::draw(VkCommandBuffer commandBuffer)
+	void Mesh::bindInstanced(VkCommandBuffer commandBuffer, VkBuffer instanceBuffer, VkDeviceSize instanceOffset)
+	{
+		VkBuffer vertexBuffers[] = { vertexBuffer->getBuffer(), instanceBuffer};
+		VkDeviceSize offsets[] = { 0 , instanceOffset };
+		vkCmdBindVertexBuffers(commandBuffer, 0, 2, vertexBuffers, offsets);
+
+		if (hasIndexBuffer()) {
+			vkCmdBindIndexBuffer(commandBuffer, indexBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT16);
+		}
+	}
+
+	void Mesh::draw(VkCommandBuffer commandBuffer, uint32_t instanceCount, uint32_t firstInstance)
 	{
 		if (hasIndexBuffer()) {
-			vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indexCount), 1, 0, 0, 0);
+			vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indexCount), instanceCount, 0, 0, firstInstance);
 		}
 		else {
-			vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertexCount), 1, 0, 0);
+			vkCmdDraw(commandBuffer, static_cast<uint32_t>(vertexCount), instanceCount, 0, firstInstance);
 		}
 	}
 

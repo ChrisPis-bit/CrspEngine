@@ -96,7 +96,7 @@ namespace crsp {
 		configInfo.dynamicStateInfo.dynamicStateCount = static_cast<uint32_t>(configInfo.dynamicStateEnables.size());
 		configInfo.dynamicStateInfo.flags = 0;
 
-		configInfo.vertexInputBindingDescription = Vertex::getBindingDescriptions();
+		configInfo.vertexInputBindingDescriptions = Vertex::getBindingDescriptions();
 		configInfo.vertexInputAttributeDescriptions = Vertex::getAttributeDescriptions();
 	}
 
@@ -151,9 +151,9 @@ namespace crsp {
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
 		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(configInfo.vertexInputAttributeDescriptions.size());
-		vertexInputInfo.vertexBindingDescriptionCount = 1;
+		vertexInputInfo.vertexBindingDescriptionCount = configInfo.vertexInputBindingDescriptions.size();
 		vertexInputInfo.pVertexAttributeDescriptions = configInfo.vertexInputAttributeDescriptions.data();
-		vertexInputInfo.pVertexBindingDescriptions = &configInfo.vertexInputBindingDescription;
+		vertexInputInfo.pVertexBindingDescriptions = configInfo.vertexInputBindingDescriptions.data();
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;

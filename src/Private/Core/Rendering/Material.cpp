@@ -120,7 +120,7 @@ namespace crsp {
 			pipelineConfig.depthStencilInfo.depthTestEnable = VK_FALSE;
 			pipelineConfig.depthStencilInfo.depthWriteEnable = VK_FALSE;
 			pipelineConfig.vertexInputAttributeDescriptions = Vertex2D::getAttributeDescriptions();
-			pipelineConfig.vertexInputBindingDescription = Vertex2D::getBindingDescriptions();
+			pipelineConfig.vertexInputBindingDescriptions = Vertex2D::getBindingDescriptions();
 
 			// Transparency
 			pipelineConfig.colorBlendAttachment.blendEnable = VK_TRUE;

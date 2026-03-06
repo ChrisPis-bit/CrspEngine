@@ -13,19 +13,33 @@
 
 namespace crsp {
 
+	struct InstanceData {
+		glm::mat4 modelMatrix;
+		glm::mat4 normalMatrix;
+	};
+
 	struct Vertex {
 		glm::vec3 position{};
 		glm::vec3 normal{};
 		glm::vec3 color{};
 		glm::vec2 texCoord{};
 
-		static VkVertexInputBindingDescription getBindingDescriptions() {
-			VkVertexInputBindingDescription bindingDescription{};
-			bindingDescription.binding = 0;
-			bindingDescription.stride = sizeof(Vertex);
-			bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+		static std::vector<VkVertexInputBindingDescription> getBindingDescriptions() {
+			std::vector<VkVertexInputBindingDescription> bindingDescriptions;
 
-			return bindingDescription;
+			VkVertexInputBindingDescription bindingDescriptionVertex{};
+			bindingDescriptionVertex.binding = 0;
+			bindingDescriptionVertex.stride = sizeof(Vertex);
+			bindingDescriptionVertex.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			bindingDescriptions.push_back(bindingDescriptionVertex);
+
+			VkVertexInputBindingDescription bindingDescriptionInstance{};
+			bindingDescriptionInstance.binding = 1;
+			bindingDescriptionInstance.stride = sizeof(InstanceData);
+			bindingDescriptionInstance.inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
+			bindingDescriptions.push_back(bindingDescriptionInstance);
+
+			return bindingDescriptions;
 		}
 
 		static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
@@ -59,6 +73,26 @@ namespace crsp {
 				offsetof(Vertex, texCoord)
 				});
 
+			// Instance model matrix (4 vec4s)
+			for (uint32_t i = 0; i < 4; ++i) {
+				attributeDescriptions.push_back({
+				4 + i,
+				1,
+				VK_FORMAT_R32G32B32A32_SFLOAT,
+				(uint32_t)(offsetof(InstanceData, modelMatrix) + sizeof(glm::vec4) * i)
+				});
+			}
+
+			// Instance normal matrix (4 vec4s)
+			for (uint32_t i = 0; i < 4; ++i) {
+				attributeDescriptions.push_back({
+				8 + i,
+				1,
+				VK_FORMAT_R32G32B32A32_SFLOAT,
+				(uint32_t)(offsetof(InstanceData, normalMatrix) + sizeof(glm::vec4) * i)
+				});
+			}
+
 			return attributeDescriptions;
 		}
 
@@ -72,13 +106,15 @@ namespace crsp {
 		glm::vec3 color{};
 		glm::vec2 texCoord{};
 
-		static VkVertexInputBindingDescription getBindingDescriptions() {
+		static std::vector<VkVertexInputBindingDescription> getBindingDescriptions() {
+			std::vector<VkVertexInputBindingDescription> bindingDescriptions;
 			VkVertexInputBindingDescription bindingDescription{};
 			bindingDescription.binding = 0;
 			bindingDescription.stride = sizeof(Vertex2D);
 			bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+			bindingDescriptions.push_back(bindingDescription);
 
-			return bindingDescription;
+			return bindingDescriptions;
 		}
 
 		static std::vector<VkVertexInputAttributeDescription> getAttributeDescriptions() {
@@ -145,7 +181,8 @@ namespace crsp {
 		Mesh& operator=(const Mesh&) = delete;
 
 		void bind(VkCommandBuffer commandBuffer);
-		void draw(VkCommandBuffer commandBuffer);
+		void bindInstanced(VkCommandBuffer commandBuffer, VkBuffer instanceBuffer, VkDeviceSize instanceOffset);
+		void draw(VkCommandBuffer commandBuffer, uint32_t instanceCount = 1, uint32_t firstInstance = 0);
 
 		/// <summary>
 		/// Write to the vertex buffer.

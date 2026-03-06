@@ -23,7 +23,7 @@ namespace crsp {
 		VkRenderPass renderPass = nullptr;
 		uint32_t subpass = 0;
 
-		VkVertexInputBindingDescription vertexInputBindingDescription;
+		std::vector<VkVertexInputBindingDescription> vertexInputBindingDescriptions;
 		std::vector<VkVertexInputAttributeDescription> vertexInputAttributeDescriptions;
 	};
 
