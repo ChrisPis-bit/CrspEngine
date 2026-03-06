@@ -20,7 +20,7 @@ namespace crsp {
 		ResourceManager(Device& device, Renderer& renderer, GlobalDescriptorsManager& descriptorsManager);
 		~ResourceManager() = default;
 
-		std::shared_ptr<FontAtlas> loadFont(std::string filePath, std::string identifier);
+		std::shared_ptr<FontAtlas> loadFont(std::string filePath, std::string identifier, uint32_t fontSize = 16, uint32_t atlasSize = 128);
 		std::shared_ptr<FontAtlas> getFont(std::string identifier);
 
 		std::shared_ptr<Texture2D> loadTexture(std::string filePath, std::string identifier, Texture2D::Filter filter = Texture2D::Filter::LINEAR);

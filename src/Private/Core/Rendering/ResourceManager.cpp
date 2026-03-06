@@ -10,13 +10,13 @@ namespace crsp {
 	ResourceManager::ResourceManager(Device& device, Renderer& renderer, GlobalDescriptorsManager& descriptorsManager) : device{ device }, renderer{ renderer }, descriptorsManager{ descriptorsManager }
 	{
 	}
-	std::shared_ptr<FontAtlas> ResourceManager::loadFont(std::string filePath, std::string identifier)
+	std::shared_ptr<FontAtlas> ResourceManager::loadFont(std::string filePath, std::string identifier, uint32_t fontSize, uint32_t atlasSize)
 	{
 		if (auto pair = loadedFonts.find(identifier); pair != loadedFonts.end()) {
 			return pair->second;
 		}
 		else {
-			std::shared_ptr<FontAtlas> fontAtlas = std::make_shared<FontAtlas>(device, 16, 128, filePath, Texture2D::Filter::NEAREST);
+			std::shared_ptr<FontAtlas> fontAtlas = std::make_shared<FontAtlas>(device, fontSize, atlasSize, filePath, Texture2D::Filter::NEAREST);
 			loadedFonts.insert({ identifier, fontAtlas });
 			return fontAtlas;
 		}

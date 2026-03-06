@@ -5,6 +5,7 @@ The engine contains a simple Vulkan rendering pipeline with dynamic batched rend
 
 # Dependencies
 - glfw3
+- glm
 - Freetype
 
 Dependencies are managed through vcpkg.

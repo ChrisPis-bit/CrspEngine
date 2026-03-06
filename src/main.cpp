@@ -10,7 +10,7 @@
 
 int main()
 {
-	crsp::App app(std::make_unique<crsp::BoidsScene>());
+	crsp::App app(std::make_unique<crsp::SnakeScene>());
 
 	try {
 		app.run();

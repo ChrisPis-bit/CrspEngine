@@ -1,5 +1,5 @@
 {
 "dependencies":[
-  "glfw3", "freetype"
+  "glfw3", "freetype", "glm"
 ]
 }
