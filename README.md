@@ -18,7 +18,7 @@ git clone https://github.com/microsoft/vcpkg/bootstrap-vcpkg.bat   # Windows
 Then you can build with CMake, and run the generated CrspEngine.exe
 
 # Scenes
-To change between scenes, for now you can go to main.cpp and change the Scene class on line 13 to either 'SnakeScene' or 'BoidsScene', or any other class inherited from the base Scene class.
+To change between scenes, for now you have to go to main.cpp and change the Scene class on line 13 to either 'SnakeScene' or 'BoidsScene', or any other class inherited from the base Scene class.
 
 # Features
 - Vulkan graphics API
