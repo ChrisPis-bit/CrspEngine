@@ -104,9 +104,9 @@ namespace crsp {
 		entityManager.addComponent<SnakeHead>(snakeEntity, appleEntity, scoreTextEntity);
 
 		// Environment
-		for (int x = 0; x < grid.width + 100; x++)
+		for (int x = 0; x < grid.width; x++)
 		{
-			for (int y = 0; y < grid.height + 100; y++)
+			for (int y = 0; y < grid.height; y++)
 			{
 				Entity groundTile = entityManager.createEntity();
 				transform = entityManager.addComponent<Transform>(groundTile);

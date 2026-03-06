@@ -104,7 +104,6 @@ namespace crsp {
 		uint32_t curOffset = currentOffset * sizeof(InstanceData);
 
 		stagingBuffer->writeToBuffer((void*)instanceData.data(), bufferSize, curOffset);
-
 	}
 
 	void DynamicBatcher::mapInstanceBuffer(int renderInstances)
