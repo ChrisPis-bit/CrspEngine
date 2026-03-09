@@ -8,6 +8,10 @@
 #include <type_traits>
 
 namespace crsp {
+	/// <summary>
+	/// Main controller for the ECS.
+	/// Creates entities, registers entities to systems, and adds their components to the proper pools.
+	/// </summary>
 	class EntityManager {
 	public:
 		EntityManager() = default;
@@ -20,6 +24,25 @@ namespace crsp {
 
 		Entity createEntity();
 		void destroyEntity(Entity entity);
+
+		/// <summary>
+		/// Allows user to set custom size for a component pool.
+		/// </summary>
+		/// <typeparam name="T">Component type</typeparam>
+		/// <param name="pageCapacity">Capacity per page</param>
+		template<typename T>
+		void preAllocateComponentPool(size_t pageCapacity) {
+			int componentId = getId<T>();
+			size_t componentPoolsAmount = componentPools.size();
+
+			if (componentPoolsAmount <= componentId) {
+				componentPools.resize(componentId + 1);
+				componentPools[componentId] = std::make_unique<ComponentPool<T>>(pageCapacity);
+			}
+			else if (!componentPools[componentId]) {
+				componentPools[componentId] = std::make_unique<ComponentPool<T>>(pageCapacity);
+			}
+		}
 
 		template<typename T, typename... Args>
 		T* addComponent(Entity entity, Args&&... args) {
@@ -35,7 +58,7 @@ namespace crsp {
 			}
 
 			ComponentPool<T>* componentPool = static_cast<ComponentPool<T>*>(componentPools[componentId].get());
-			T* newComponent = new (componentPool->get(entity.getIndex())) T(std::forward<Args>(args)...);
+			T* newComponent = new (componentPool->create(entity.getIndex())) T(std::forward<Args>(args)...);
 
 			entities[entity.getIndex()].mask.set(componentId);
 			systemManager.entityComponentMaskChanged(entity, entities[entity.getIndex()].mask);
@@ -60,6 +83,9 @@ namespace crsp {
 
 			int componentId = getId<T>();
 			entities[entity.getIndex()].mask.reset(componentId);
+
+			ComponentPool<T>* componentPool = static_cast<ComponentPool<T>*>(componentPools[componentId].get());
+			componentPool->remove(entity.getIndex());
 
 			systemManager.entityComponentMaskChanged(entity, entities[entity.getIndex()].mask);
 		}

@@ -10,7 +10,7 @@ namespace crsp {
 			return entities[newIndex].entity;
 		}
 
-		entities.push_back({ createEntityId(EntityIndex(entities.size()), 0), ComponentMask()});
+		entities.push_back({ createEntityId(EntityIndex(entities.size()), 0), ComponentMask() });
 
 		auto entityDesc = entities.back();
 		systemManager.entityComponentMaskChanged(entityDesc.entity, entityDesc.mask);
@@ -20,6 +20,13 @@ namespace crsp {
 
 	void EntityManager::destroyEntity(Entity entity)
 	{
+		// Remove from components
+		for (size_t i = 0; i < componentPools.size(); i++)
+		{
+			if (entities[entity.getIndex()].mask.test(i))
+				componentPools[i]->remove(entity.getIndex());
+		}
+
 		Entity newInvalidEntity = createEntityId(EntityIndex(-1), entity.getVersion() + 1);
 		entities[entity.getIndex()].entity = newInvalidEntity;
 		entities[entity.getIndex()].mask.reset();

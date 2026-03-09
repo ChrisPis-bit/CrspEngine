@@ -36,6 +36,10 @@ namespace crsp {
 		textRenderSystem = entityManager.registerSystem<TextRenderSystem>(getWindow());
 
 		entityManager.registerSystem<BoidSystem>(boidSettings);
+
+		entityManager.preAllocateComponentPool<Boid>(4096);
+		entityManager.preAllocateComponentPool<Transform>(4096);
+		entityManager.preAllocateComponentPool<MeshRender>(4096);
 	}
 
 	void BoidsScene::spawnEntities()

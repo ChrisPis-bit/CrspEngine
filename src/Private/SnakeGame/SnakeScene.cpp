@@ -59,6 +59,12 @@ namespace crsp {
 
 		snakeControllerSystem = entityManager.registerSystem<SnakeControllerSystem>(grid, getInputSystem(), getResourceManager());
 		entityManager.registerSystem<GridTransformSystem>(grid);
+
+		// Pre-allocate memory and set capacity of component pools
+		entityManager.preAllocateComponentPool<SnakeHead>(4); // Won't really need more than 1
+		// Rest of the pools automatically allocate 1024 per page, which is more than enough
+
+		entityManager.preAllocateComponentPool<MeshRender>(8);
 	}
 
 	void SnakeScene::spawnEntities()
