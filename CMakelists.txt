@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(OpenMP REQUIRED)
+
 
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 add_executable(${CMAKE_PROJECT_NAME} "${MY_SOURCES}" "src/main.cpp")
@@ -25,7 +27,7 @@ find_package(Vulkan REQUIRED)
 target_include_directories(CrspEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 target_include_directories(CrspEngine PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/Public/Core")
 
-target_link_libraries(CrspEngine PRIVATE Freetype::Freetype glfw Vulkan::Vulkan)
+target_link_libraries(CrspEngine PRIVATE Freetype::Freetype glfw Vulkan::Vulkan OpenMP::OpenMP_CXX)
 
 # Correct glslc path
 file(TO_CMAKE_PATH "$ENV{VULKAN_SDK}" VULKAN_SDK_PATH)

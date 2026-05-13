@@ -2,12 +2,40 @@
 
 #include <algorithm>
 #include <execution> 
+#include <omp.h>
 
 namespace crsp {
 	void BoidSystem::update(float deltaTime, float currentTime)
 	{
-		for (auto const& entity : entities)
+		std::vector<Entity const*> entityVector;
+		entityVector.reserve(entities.size());
+
+		for (auto const& e : entities)
 		{
+			entityVector.push_back(&e);
+		}
+
+		std::vector<glm::vec3> positions;
+		std::vector<glm::vec3> velocities;
+
+		positions.reserve(entityVector.size());
+		velocities.reserve(entityVector.size());
+
+		for (Entity const* e : entityVector)
+		{
+			positions.push_back(
+				entityManager.getComponent<Transform>(*e)->position
+			);
+
+			velocities.push_back(
+				entityManager.getComponent<Boid>(*e)->velocity
+			);
+		}
+
+#pragma omp parallel for
+		for (int i = 0; i < (int)entityVector.size(); i++)
+		{
+			Entity const& entity = *entityVector[i];
 			Transform* transform = entityManager.getComponent<Transform>(entity);
 			Boid* boid = entityManager.getComponent<Boid>(entity);
 
@@ -19,30 +47,32 @@ namespace crsp {
 
 			glm::vec3 seperation(0.0f);
 
-			for (auto const& otherEntity : entities)
+			for (int j = 0; j < (int)entityVector.size(); j++)
 			{
+				Entity const& otherEntity = *entityVector[j];
+
 				// Skip self
 				if (otherEntity == entity)
 					continue;
 
-				Transform* otherTransform = entityManager.getComponent<Transform>(otherEntity);
-				Boid* otherBoid = entityManager.getComponent<Boid>(otherEntity);
+				glm::vec3 otherBoidPos =  positions[j];
+				glm::vec3 otherBoidVel = velocities[j];
 
 				// Calculate dist and direction
-				glm::vec3 distVec = transform->position - otherTransform->position;
+				glm::vec3 distVec = transform->position - otherBoidPos;
 				float dist = glm::length(distVec);
 				glm::vec3 dir = distVec / dist;
 
 				// Alignment
 				if (dist <= settings.alignmentRadius) {
 					alignmentNeighbours++;
-					alignment += otherBoid->velocity;
+					alignment += otherBoidVel;
 				}
 
 				// Cohesion
 				if (dist <= settings.cohesionRadius) {
 					cohesionNeighbours++;
-					center += otherTransform->position;
+					center += otherBoidPos;
 				}
 
 				// Separation

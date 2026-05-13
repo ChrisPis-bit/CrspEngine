@@ -40,7 +40,7 @@ namespace crsp {
 
 	void BoidsScene::spawnEntities()
 	{
-		for (size_t i = 0; i < 1000; i++)
+		for (size_t i = 0; i < 5000; i++)
 		{
 			Entity newBoid = entityManager.createEntity();
 
